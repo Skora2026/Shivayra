@@ -1,0 +1,96 @@
+ .checkout-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: var(--primary-shadow);
+        }
+
+        .checkout-card label {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--vibrant-mint);
+            padding-bottom: 5px
+        }
+
+        .summary-card {
+            position: sticky;
+            top: 100px;
+            border-top: 5px solid var(--deep-forest);;
+        }
+
+        .summary-detail {
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--deep-forest);
+        }
+
+        .form-control {
+            border-radius: 10px;
+            padding: 10px;
+            font-size: 14px !important;
+        }
+
+        .form-control:focus {
+            box-shadow: none !important;
+            border-color: var(--deep-forest) !important;
+            box-shadow: 0 0 0 0.15rem rgba(163, 0, 3, 0.25);
+        }
+
+        .payment-box {
+            border: 2px solid #eee;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .payment-box:hover {
+            border-color: var(--deep-forest);
+        }
+
+        .payment-box.active {
+            border-color: var(--deep-forest);
+            background: #fff5f5;
+        }
+
+        .order-btn {
+            background: var(--vibrant-mint);
+            color: white;
+            padding: 14px;
+            border: none;
+            width: 100%;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .order-btn:hover {
+            background: var(--deep-forest);
+        }
+
+        .total-box {
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 12px;
+        }
+
+        .total-box p {
+            font-size: 14px;
+        }
+
+        .coupon-box .btn {
+            background: var(--vibrant-mint);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 15px;
+        }
+
+        .coupon-box .btn:hover {
+            background: var(--deep-forest);
+        }

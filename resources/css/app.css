@@ -1,0 +1,11 @@
+@import "bootstrap/dist/css/bootstrap.min.css";
+@import "bootstrap-icons/font/bootstrap-icons.css";
+
+@import "./front/common.css";
+@import "./front/header.css";
+@import "./front/footer.css";
+@import "./front/index.css";
+@import "./front/product-detail.css";
+@import "./front/checkout.css";
+@import "./front/product.css";
+@import "./front/contact.css";

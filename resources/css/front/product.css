@@ -1,0 +1,256 @@
+.filter-box {
+        background: #fff;
+        border-radius: 16px;
+        padding: 15px;
+        box-shadow: 0 0 10px rgba(0,0,0,.05);
+    }
+    .filter-btn {
+        width: 100%;
+        text-align: left;
+        background: #fff !important;
+        border: none;
+        padding: 3px 12px;
+        font-weight: 600;
+        font-size: 14px;
+        cursor: pointer;
+        border-radius: 6px;
+    }
+    .filter-content {
+        padding: 8px 12px;
+    }
+    .filter-content label {
+        font-size: 13px;
+        cursor: pointer;
+        display: block;
+        margin-bottom: 5px;
+    }
+    .color-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 2px solid #ddd;
+        transition: all 0.2s;
+    }
+    .color-dot.selected {
+        border: 2px solid #28a745;
+        box-shadow: 0 0 0 2px #fff, 0 0 0 3px #28a745;
+    }
+    .color-dot.red { background: #dc3545; }
+    .color-dot.black { background: #212529; }
+    .color-dot.blue { background: #0d6efd; }
+
+    
+    .product-card {
+        background: #fff;
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        height: 100%;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    }
+    .product-img {
+        position: relative;
+        overflow: hidden;
+        aspect-ratio: 1/1;
+        background: #f8f9fa;
+    }
+    .product-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .product-badge {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: var(--burgundy);
+        color: #F3EDE4;
+        padding: 4px 12px;
+        border-radius: 2px;
+        font-size: 10px;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        z-index: 1;
+    }
+    .product-body {
+        padding: 12px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    .product-body h6 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .pp-price strong {
+        font-size: 16px;
+        color: var(--burgundy);
+    }
+    .pp-price del {
+        font-size: 13px;
+        color: #A39A8E;
+        margin-left: 8px;
+    }
+    .pp-hover {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        padding: 12px;
+        border-top: 1px solid var(--gold-hairline);
+    }
+    .pp-hover-btn {
+        width: 36px;
+        height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--champagne);
+        border-radius: 50%;
+        color: var(--burgundy);
+        text-decoration: none;
+        border: 1px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .pp-hover-btn:hover {
+        background: var(--burgundy);
+        color: #F3EDE4;
+    }
+    
+    .mobile-filter-bar {
+        display: flex;
+        overflow-x: auto;
+        gap: 8px;
+        padding: 10px 0;
+    }
+    .filter-chip {
+        white-space: nowrap;
+        border: 1px solid #ddd;
+        padding: 6px 14px;
+        border-radius: 4px;
+        background: #fff;
+        font-size: 13px;
+        cursor: pointer;
+    }
+    .filter-chip.active {
+        background: var(--burgundy);
+        color: #F3EDE4;
+        border-color: var(--burgundy);
+    }
+    .mobile-filter-content {
+        margin-top: 10px;
+    }
+    .filter-panel {
+        display: none;
+        background: #fff;
+        padding: 10px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        border: 1px solid #eee;
+    }
+    .filter-panel.active {
+        display: block;
+    }
+    .filter-panel label {
+        display: inline-block;
+        margin-right: 15px;
+        padding: 6px 0;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    .grid-btn {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 4px 12px;
+        font-size: 14px;
+        cursor: pointer;
+    }
+    .grid-btn.active {
+        background: var(--burgundy) !important;
+        color: #F3EDE4 !important;
+        border-color: var(--burgundy) !important;
+    }
+    .product-grid {
+        transition: all 0.3s ease;
+    }
+
+    /* Premium Price Range Slider */
+    .price-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 100%;
+        height: 6px;
+        border-radius: 10px;
+        background: #e5e0d8; /* Light luxury grey/cream background */
+        outline: none;
+        margin: 15px 0;
+        cursor: pointer;
+    }
+
+    /* Chrome, Safari, Opera and Edge Track */
+    .price-slider::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 6px;
+        cursor: pointer;
+        border-radius: 10px;
+        background: transparent; /* Colored dynamically by JS background gradient */
+    }
+
+    /* Firefox Track */
+    .price-slider::-moz-range-track {
+        width: 100%;
+        height: 6px;
+        cursor: pointer;
+        border-radius: 10px;
+        background: transparent;
+    }
+
+    /* Chrome, Safari, Opera and Edge Thumb */
+    .price-slider::-webkit-slider-thumb {
+        height: 18px;
+        width: 18px;
+        border-radius: 50%;
+        background: var(--burgundy); /* Deep burgundy */
+        border: 2px solid var(--gold-bright); /* Champagne Gold border */
+        cursor: pointer;
+        -webkit-appearance: none;
+        margin-top: -6px; /* Align center with track */
+        box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+        transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    .price-slider:hover::-webkit-slider-thumb {
+        background: var(--gold-bright); /* Champagne gold on hover */
+        border-color: var(--burgundy);
+        transform: scale(1.2);
+    }
+
+    /* Firefox Thumb */
+    .price-slider::-moz-range-thumb {
+        height: 16px;
+        width: 16px;
+        border-radius: 50%;
+        background: #111111;
+        border: 2px solid #C5A880;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+        transition: transform 0.15s ease, background-color 0.15s ease;
+    }
+    .price-slider:hover::-moz-range-thumb {
+        background: #C5A880;
+        border-color: #111111;
+        transform: scale(1.2);
+    }

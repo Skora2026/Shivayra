@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="75%">
+      <stop offset="0%" stop-color="#FFFDF9"/>
+      <stop offset="100%" stop-color="#F1E8DC"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <rect x="24" y="24" width="552" height="552" fill="none" stroke="#C9A96A" stroke-width="1.5"/>
+  <rect x="32" y="32" width="536" height="536" fill="none" stroke="#C9A96A" stroke-width="0.75" opacity="0.6"/>
+  <g transform="translate(300,270)" fill="none" stroke="#B08D57" stroke-width="4" stroke-linejoin="round">
+    <path d="M -70 -30 L -35 -30 L -17 -60 L 17 -60 L 35 -30 L 70 -30 L 0 70 Z"/>
+    <path d="M -35 -30 L -17 10 L 0 70" opacity="0.7"/>
+    <path d="M 35 -30 L 17 10 L 0 70" opacity="0.7"/>
+    <path d="M -17 -60 L -17 10 M 17 -60 L 17 10" opacity="0.5"/>
+  </g>
+  <text x="300" y="420" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" letter-spacing="10" fill="#5C1A2E">SHIVAYRA</text>
+  <text x="300" y="456" text-anchor="middle" font-family="Georgia, serif" font-size="15" letter-spacing="6" fill="#8C7355">FINE JEWELRY</text>
+</svg>

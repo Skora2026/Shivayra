@@ -1,0 +1,255 @@
+<?php
+
+use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\ProductController;
+use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\SubCategoryController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ContactController;
+use App\Models\Banner;
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+// Frontend Auth
+Route::get('/login', [AuthController::class, 'loginView'])->middleware('guest')->name('login');
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1')->name('login.submit');
+Route::get('/register', [AuthController::class, 'registerView'])->middleware('guest')->name('register');
+Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1')->name('register.submit');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Forgot & Reset Password via OTP
+Route::middleware('guest')->group(function () {
+    Route::get('/forgot-password', [AuthController::class, 'forgotPasswordView'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'sendOtp'])->middleware('throttle:3,10')->name('password.email');
+    Route::get('/reset-password', [AuthController::class, 'resetPasswordView'])->name('password.reset');
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])->middleware('throttle:10,1')->name('password.update');
+});
+
+Route::get('/', function () {
+    $categories = Category::where('status', 'active')
+        ->get();
+
+    // Check parent category and subcategory statuses
+    $featuredProducts = Product::where('status', 'active')
+        ->where('is_featured', true)
+        ->whereHas('category', function ($q) {
+            $q->where('status', 'active');
+        })
+        ->where(function ($q) {
+            $q->whereNull('sub_category_id')
+                ->orWhereHas('subCategory', function ($sq) {
+                    $sq->where('status', 'active');
+                });
+        })
+        ->get();
+
+    $trendingProducts = Product::where('status', 'active')
+        ->where('is_trending', true)
+        ->whereHas('category', function ($q) {
+            $q->where('status', 'active');
+        })
+        ->where(function ($q) {
+            $q->whereNull('sub_category_id')
+                ->orWhereHas('subCategory', function ($sq) {
+                    $sq->where('status', 'active');
+                });
+        })
+        ->get();
+
+    $allProducts = Product::where('status', 'active')
+        ->whereHas('category', function ($q) {
+            $q->where('status', 'active');
+        })
+        ->where(function ($q) {
+            $q->whereNull('sub_category_id')
+                ->orWhereHas('subCategory', function ($sq) {
+                    $sq->where('status', 'active');
+                });
+        })
+        ->get();
+
+    $banners = Banner::active()->ordered()->get();
+
+    return view('front.index', compact('categories', 'featuredProducts', 'trendingProducts', 'allProducts', 'banners'));
+});
+
+Route::get('/product-detail/{slug}', function ($slug) {
+    // Only fetch product if active AND its category and subcategory are active
+    $product = Product::where('slug', $slug)
+        ->where('status', 'active')
+        ->whereHas('category', function ($q) {
+            $q->where('status', 'active');
+        })
+        ->where(function ($q) {
+            $q->whereNull('sub_category_id')
+                ->orWhereHas('subCategory', function ($sq) {
+                    $sq->where('status', 'active');
+                });
+        })
+        ->firstOrFail();
+
+    $relatedProducts = Product::where('category_id', $product->category_id)
+        ->where('id', '!=', $product->id)
+        ->where('status', 'active')
+        ->whereHas('category', function ($q) {
+            $q->where('status', 'active');
+        })
+        ->where(function ($q) {
+            $q->whereNull('sub_category_id')
+                ->orWhereHas('subCategory', function ($sq) {
+                    $sq->where('status', 'active');
+                });
+        })
+        ->limit(4)
+        ->get();
+
+    return view('front.product-detail', compact('product', 'relatedProducts'));
+})->name('product_detail');
+
+Route::get('/about', function () {
+    return view('front.about');
+})->name('about_us');
+
+Route::get('/product', function (Request $request) {
+    $query = Product::with(['category', 'subCategory'])
+        ->where('status', 'active')
+        ->whereHas('category', function ($q) {
+            $q->where('status', 'active');
+        })
+        ->where(function ($q) {
+            $q->whereNull('sub_category_id')
+                ->orWhereHas('subCategory', function ($sq) {
+                    $sq->where('status', 'active');
+                });
+        });
+
+    if ($request->get('filter') === 'new_arrivals') {
+        $query->where('is_new_arrival', true);
+    }
+
+    if ($search = $request->get('search')) {
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhere('description', 'like', "%{$search}%");
+        });
+    }
+
+    $products = $query->get();
+
+    $maxPrice = 5000;
+    if ($products->isNotEmpty()) {
+        $maxPrice = $products->max(function ($product) {
+            return (int) ($product->sale_price ?? $product->price);
+        });
+        $maxPrice = max($maxPrice, 5000);
+    }
+
+    $filterData = [
+        'purities' => $products->pluck('pattern')->filter()->unique()->values(),
+        'occasions' => $products->pluck('occasion')->filter()->unique()->values(),
+        'metals' => $products->pluck('fabric')->filter()->unique()->values(),
+        'gemstones' => $products->pluck('neckline')->filter()->unique()->values(),
+        'sizes' => $products->pluck('size')->filter()->unique()->values(),
+        'colors' => $products->pluck('color')->filter()->unique()->values(),
+    ];
+
+    return view('front.products', compact('products', 'maxPrice', 'filterData'));
+})->name('products');
+
+Route::get('/termsandcondition', function () {
+    return view('front.terms-and-conditions');
+})->name('terms&conditions');
+
+Route::get('/returnandrefund', function () {
+    return view('front.return-and-refund');
+})->name('return&refund');
+
+Route::get('/privacypolicy', function () {
+    return view('front.privacy-policy');
+})->name('privacy_policy');
+
+Route::get('/wishlist', function () {
+    return view('front.wishlist');
+})->name('wishlist');
+
+Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
+Route::post('/checkout', [CheckoutController::class, 'placeOrder'])->name('checkout.store');
+Route::post('/checkout/verify', [CheckoutController::class, 'verifyPayment'])->name('checkout.verify');
+Route::get('/order-success/{id}', [CheckoutController::class, 'success'])->name('order.success');
+
+// Razorpay webhook (CSRF-exempt in bootstrap/app.php; verified by signature)
+Route::post('/webhooks/razorpay', [CheckoutController::class, 'webhook'])->name('webhooks.razorpay');
+
+// Customer Account Dashboard & Order Tracking
+Route::middleware('auth')->group(function () {
+    Route::get('/my-account', [AccountController::class, 'index'])->name('my-account');
+    Route::get('/order-detail/{order_number}', [AccountController::class, 'orderDetails'])->name('order.details');
+    Route::put('/profile/update', [AccountController::class, 'updateProfile'])->name('profile.update');
+});
+
+Route::get('contact', function () {
+    return view('front.contact');
+})->name('contact-us');
+Route::post('contact', [ContactController::class, 'store'])
+    ->middleware('throttle:5,10')
+    ->name('contact.store');
+
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
+use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ProfileController;
+use App\Http\Controllers\Admin\UserController;
+
+/**
+ * Admin guest Route
+ * */
+Route::prefix('admin')->name('admin.')->group(function () {
+    /** owner login — separate controller: only the admin role may pass */
+    Route::get('/login', [AdminAuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AdminAuthController::class, 'login'])->name('login.submit');
+
+    // No public registration under /admin — accounts are created on the storefront
+
+    Route::middleware('auth')->group(function () {
+        Route::post('/logout', [AdminAuthController::class, 'logout'])->name('logout');
+
+        // Profile Settings
+        Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+        Route::middleware('role:admin')->group(function () {
+            Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+            // User Module
+            Route::resource('users', UserController::class);
+
+            // Category Management
+            Route::resource('categories', CategoryController::class);
+
+            // Sub-Category Management
+            // AJAX: get sub-categories by category (must be before resource to avoid conflict)
+            Route::get('sub-categories/by-category/{category_id}', [SubCategoryController::class, 'byCategoryAjax'])
+                ->name('sub-categories.by-category');
+            Route::resource('sub-categories', SubCategoryController::class);
+
+            // Product Management
+            Route::resource('products', ProductController::class);
+
+            // Banner Management
+            Route::resource('banners', BannerController::class);
+
+            // Setting Management
+            Route::resource('settings', SettingController::class);
+
+            // Order Management
+            Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
+            Route::get('orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+            Route::post('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+        });
+    });
+});
