@@ -18,6 +18,9 @@
 /public/hot
 /public/storage
 storage/framework/views/
+storage/framework/sessions/
+storage/app/*backup*
+/storage/app/*.json
 storage/app/public
 /storage/*.key
 /storage/pail
