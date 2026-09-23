@@ -1,23 +1,4 @@
 {
-  "framework": null,
-  "buildCommand": null,
-  "installCommand": "composer install --no-dev --no-interaction --prefer-dist",
   "outputDirectory": "public",
-  "regions": ["sin1"],
-  "builds": [
-    {
-      "src": "public/index.php",
-      "use": "@vercel/php"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/storage/(.*)",
-      "dest": "/storage/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "public/index.php"
-    }
-  ]
+  "installCommand": "composer install --no-dev --no-interaction --prefer-dist && npm install --ignore-scripts"
 }

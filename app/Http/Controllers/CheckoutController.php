@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Checkout\PlaceOrderRequest;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\ProductVariant;
 use App\Services\CheckoutService;
 use Illuminate\Http\RedirectResponse;
@@ -12,6 +13,7 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
 class CheckoutController extends Controller
@@ -74,6 +76,51 @@ class CheckoutController extends Controller
      *
      * @return RedirectResponse|View
      */
+    /**
+     * Garbage-collect abandoned Razorpay checkouts: pending, unpaid orders
+     * that hold reserved stock forever. Frees anything still pending after a
+     * day (Razorpay sessions are minutes, not hours — a day is generous).
+     * Stock restore mirrors admin cancel.
+     *
+     * Razorpay ONLY by design: a COD order legitimately sits pending + unpaid
+     * until it is fulfilled and must never be swept. These orders never got a
+     * customer confirmation email, so the sweep also stays silent.
+     */
+    public static function sweepAbandonedRazorpayOrders(): void
+    {
+        Order::where('created_at', '<', now()->subDay())
+            ->where('payment_method', 'razorpay')
+            ->where('payment_status', 'pending')
+            ->where('order_status', 'pending')
+            ->with('items')
+            ->chunkById(100, function ($orders): void {
+                foreach ($orders as $stale) {
+                    \DB::transaction(function () use ($stale): void {
+                        $claimed = Order::where('id', $stale->id)
+                            ->where('payment_status', 'pending')
+                            ->where('order_status', 'pending')
+                            ->update([
+                                'payment_status' => 'failed',
+                                'order_status' => 'cancelled',
+                            ]);
+
+                        if ($claimed) {
+                            foreach ($stale->items as $item) {
+                                if ($item->product_variant_id) {
+                                    ProductVariant::where('id', $item->product_variant_id)
+                                        ->increment('stock', $item->qty);
+                                }
+                                if ($item->product) {
+                                    Product::where('id', $item->product->id)
+                                        ->increment('stock', $item->qty);
+                                }
+                            }
+                        }
+                    });
+                }
+            });
+    }
+
     public function placeOrder(PlaceOrderRequest $request)
     {
         // Verify Authentication
@@ -82,6 +129,22 @@ class CheckoutController extends Controller
         }
 
         $data = $request->validated();
+
+        // Abuse guard: cap order creation per user. Prevents both a runaway
+        // double-click loop and scripted order flooding that hoards stock in
+        // unpaid pending orders.
+        if (RateLimiter::tooManyAttempts('checkout:'.$request->user()->id, 10)) {
+            $seconds = RateLimiter::availableIn('checkout:'.$request->user()->id);
+
+            return back()
+                ->with('error', 'Too many orders attempted. Please try again in '.max(1, (int) ceil($seconds / 60)).' minute(s).')
+                ->withInput();
+        }
+        RateLimiter::hit('checkout:'.$request->user()->id, 600);
+
+        // Garbage collection of abandoned checkouts — rules extracted so
+        // they are directly testable.
+        self::sweepAbandonedRazorpayOrders();
 
         try {
             // Process checkout and place order in database (status: pending)

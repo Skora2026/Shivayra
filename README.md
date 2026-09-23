@@ -1,58 +1,59 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Shivayra
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Luxury jewellery e-commerce storefront + single-owner admin panel, built on
+**Laravel 12** with a Blade/Vite front end, Yajra DataTables in the admin,
+Swiper galleries, Razorpay + COD checkout, OTP email auth and SMTP
+transactional email across the full order lifecycle
+(placed → shipped → delivered → cancelled → returned → refunded).
 
-## About Laravel
+## Repository layout
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- `public_html/` — the Laravel application (storefront, admin panel, all tests)
+- `docs/` — project plans and test documentation
+- `shivayra_db.sql` — database import for a fresh setup
+- `tests/admin-suite.sh` — curl-based admin feature suite (repo-adjacent)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
-
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Run locally
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+cd public_html
+composer install && npm install
+npm run build
+# either import ../shivayra_db.sql  — or —  php artisan migrate --seed
+php artisan serve            # http://127.0.0.1:8000
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Admin panel lives at `/admin/login`; the owner account is seeded by
+`database/seeders/AdminSeeder.php`. Customers sign up/in at `/login` with
+email + OTP verification.
 
-## Contributing
+## Testing
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Two permanent layers — full suite inventory, prerequisites and regression
+guards are documented in [`docs/testing.md`](../docs/testing.md):
 
-## Code of Conduct
+- **`php artisan test`** — feature tests on sqlite: order-state lifecycle
+  emails, the seven-status admin/client rendering matrix, access control, and
+  filter-pill label ↔ raw-value pairings.
+- **`node tests/browser/<suite>.cjs`** (from `public_html/`, server on `:8000`,
+  Edge on debug port `9333`) — five maintained UI suites: `admin-pill-filter`,
+  `ui-state-sync`, `carousel-finetune`, `cart-chips`, `returns-lifecycle`.
+  Suites create **and clean up** their own fixtures; run them sequentially.
+- **`bash tests/admin-suite.sh`** (from the repository root) — HTTP-level
+  admin CRUD sweep with self-cleaning `ADMIN-SUITE-*` records.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+**Regression guard — COD-cancellation sweep:** the abandoned-checkout sweep in
+`CheckoutController::sweepAbandonedRazorpayOrders()` used to cancel *any*
+pending + unpaid order older than 24 h — including legitimate COD orders, so
+placing one real order could silently cancel a customer's day-old
+cash-on-delivery order. The sweep is Razorpay-only, locked by
+`OrderStateMatrixTest::test_sweep_cancels_stale_razorpay_but_never_cod`.
 
-## Security Vulnerabilities
+## Documentation
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+`docs/testing.md` · `docs/single-admin-plan.md` · `docs/admin-reenvision.md` ·
+`docs/mobile-app-redesign-plan.md`
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Laravel framework: MIT. Application code maintained by SkoraInfotech.

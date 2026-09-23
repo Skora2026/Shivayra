@@ -38,7 +38,11 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        // Validation errors / auth failures must come back as JSON whenever the
+        // client asked for JSON (Accept: application/json, X-Requested-With) —
+        // not only on api/* routes. The register page's OTP fetch posts JSON to
+        // web routes; without this its 422s were rendered as HTML redirects.
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            fn (Request $request) => $request->expectsJson() || $request->is('api/*'),
         );
     })->create();

@@ -100,9 +100,16 @@
 
 @section('content')
 @php
-    $steps = ['pending', 'processing', 'completed'];
+    // Same four states the customer's shipment timeline shows — the labels
+    // stay in sync with the storefront by construction.
+    $steps = ['pending', 'processing', 'shipped', 'completed'];
+    $stepLabels = ['pending' => 'Placed', 'processing' => 'Processing', 'shipped' => 'Shipped', 'completed' => 'Delivered'];
     $currentStep = array_search($order->order_status, $steps, true);
+    if ($currentStep === false && $order->order_status === 'delivered') {
+        $currentStep = 3; // legacy value equivalence
+    }
     $isCancelled = $order->order_status === 'cancelled';
+    $offStepper = ['returned' => 'Returned', 'refunded' => 'Refunded'];
 @endphp
 <div class="page-header-card">
     <div class="d-flex justify-content-between align-items-center position-relative flex-wrap gap-3" style="z-index:1;">
@@ -115,13 +122,15 @@
             <div class="mt-3">
                 @if($isCancelled)
                     <span class="badge bg-danger px-3 py-2">CANCELLED</span>
+                @elseif($currentStep === false && isset($offStepper[$order->order_status]))
+                    <span class="badge bg-secondary px-3 py-2">{{ strtoupper($offStepper[$order->order_status]) }}</span>
                 @else
                     <div class="status-stepper">
                         @foreach($steps as $i => $s)
                             @if($i > 0)<span class="step-bar {{ $currentStep !== false && $i <= $currentStep ? 'done' : '' }}"></span>@endif
                             <span class="step {{ $currentStep !== false && $i < $currentStep ? 'done' : '' }} {{ $currentStep === $i ? 'current' : '' }}">
                                 <span class="dot"><i class="fa-solid fa-check"></i></span>
-                                {{ ucfirst($s) }}
+                                {{ $stepLabels[$s] }}
                             </span>
                         @endforeach
                     </div>
@@ -270,12 +279,20 @@
                     @csrf
                     <div class="mb-3">
                         <label class="form-label fw-600">Order Status</label>
-                        <select name="order_status" class="form-select">
-                            <option value="pending" {{ $order->order_status === 'pending' ? 'selected' : '' }}>Pending</option>
+                        @php $isReturnState = in_array($order->order_status, ['returned', 'refunded']); @endphp
+                        <select name="order_status" class="form-select" {{ $isReturnState ? 'disabled' : '' }}>
+                            <option value="pending" {{ $order->order_status === 'pending' ? 'selected' : '' }}>Placed</option>
                             <option value="processing" {{ $order->order_status === 'processing' ? 'selected' : '' }}>Processing</option>
-                            <option value="completed" {{ $order->order_status === 'completed' ? 'selected' : '' }}>Completed</option>
+                            <option value="shipped" {{ $order->order_status === 'shipped' ? 'selected' : '' }}>Shipped</option>
+                            <option value="completed" {{ $order->order_status === 'completed' ? 'selected' : '' }}>Delivered</option>
                             <option value="cancelled" {{ $order->order_status === 'cancelled' ? 'selected' : '' }}>Cancelled</option>
                         </select>
+                        @if($isReturnState)
+                            {{-- Returned/refunded belong to the Returns module — display-only
+                                 here. The hidden twin keeps the form submittable (a disabled
+                                 select posts nothing) without ever moving the status. --}}
+                            <input type="hidden" name="order_status" value="{{ $order->order_status }}">
+                        @endif
                     </div>
 
                     <div class="mb-4">

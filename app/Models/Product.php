@@ -27,6 +27,7 @@ class Product extends Model
         'is_new_arrival',
         'is_trending',
         'is_featured',
+        'is_returnable',
         'variant_name_1',
         'variant_name_2',
         'specifications',
@@ -41,6 +42,7 @@ class Product extends Model
         'is_new_arrival' => 'boolean',
         'is_trending' => 'boolean',
         'is_featured' => 'boolean',
+        'is_returnable' => 'boolean',
         'specifications' => 'array',
         'gallery_images' => 'array',
     ];
@@ -127,5 +129,13 @@ class Product extends Model
     public function variants()
     {
         return $this->hasMany(ProductVariant::class);
+    }
+
+    /**
+     * Approved customer reviews (verified purchases).
+     */
+    public function reviews()
+    {
+        return $this->hasMany(ProductReview::class)->approved()->latest();
     }
 }

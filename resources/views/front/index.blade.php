@@ -391,7 +391,7 @@
                         <div class="swiper-slide">
                             <div class="product-card">
                                 <a href="{{ route('product_detail', $product->slug) }}">
-                                    <span class="product-badge hot">Hot</span>
+                                    <span class="product-badge hot"><svg class="icon"><use href="#i-sparkle"/></svg>Hot</span>
                                     <div class="product-img">
                                         <img src="{{ $product->image_url }}" alt="{{ $product->name }}">
                                     </div>
@@ -418,17 +418,38 @@
                                         data-img="{{ $product->image_url }}">
                                         <i class="bi bi-heart"></i>
                                     </button>
-                                    @if($product->variants->isNotEmpty())
-                                        <a href="{{ route('product_detail', $product->slug) }}" class="pp-hover-btn">
-                                            <i class="bi bi-bag-plus"></i>
-                                        </a>
-                                    @else
+                                    @php
+                                        // Quick-add from the card: first in-stock variant;
+                                        // all sold out -> fall back to the product page.
+                                        $inStockVariants = $product->variants->filter(fn ($v) => $v->stock > 0);
+                                        $quickVariant = $inStockVariants->first();
+                                    @endphp
+                                    @if($quickVariant)
                                         <button type="button" class="pp-hover-btn add-to-cart"
                                             data-id="{{ $product->id }}" data-name="{{ $product->name }}"
-                                            data-price="{{ $product->sale_price ?? $product->price }}"
+                                            data-variant-id="{{ $quickVariant->id }}"
+                                            data-variant-values="{{ collect([$quickVariant->value_1, $quickVariant->value_2])->filter()->implode(', ') }}"
+                                            data-price="{{ $quickVariant->sale_price ?? $quickVariant->price }}"
                                             data-img="{{ $product->image_url }}">
                                             <i class="bi bi-bag-plus"></i>
                                         </button>
+                                        @if($inStockVariants->count() > 1)
+                                            {{-- Tiny variant chips: pick size/weight straight from the card --}}
+                                            <div class="variant-chips" data-for="{{ $product->id }}">
+                                                @foreach ($inStockVariants as $v)
+                                                    <button type="button" class="variant-chip add-to-cart"
+                                                        data-id="{{ $product->id }}" data-name="{{ $product->name }}"
+                                                        data-variant-id="{{ $v->id }}"
+                                                        data-variant-values="{{ collect([$v->value_1, $v->value_2])->filter()->implode(', ') }}"
+                                                        data-price="{{ $v->sale_price ?? $v->price }}"
+                                                        data-img="{{ $product->image_url }}">{{ $v->value_1 }}</button>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    @else
+                                        <a href="{{ route('product_detail', $product->slug) }}" class="pp-hover-btn">
+                                            <i class="bi bi-bag-plus"></i>
+                                        </a>
                                     @endif
                                 </div>
                             </div>
@@ -439,6 +460,13 @@
 
             <div class="pp-prev">‹</div>
             <div class="pp-next">›</div>
+
+            <div class="text-center mt-4">
+                <a href="{{ route('products') }}" class="main-btn">
+                    <span>View All Products</span>
+                    <span class="shine"></span>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -456,7 +484,7 @@
                         <div class="swiper-slide">
                             <div class="product-card">
                                 <a href="{{ route('product_detail', $product->slug) }}">
-                                    <span class="product-badge hot">Hot</span>
+                                    <span class="product-badge hot"><svg class="icon"><use href="#i-sparkle"/></svg>Hot</span>
                                     <div class="product-img">
                                         <img src="{{ $product->image_url }}" alt="{{ $product->name }}">
                                     </div>
@@ -483,17 +511,38 @@
                                         data-img="{{ $product->image_url }}">
                                         <i class="bi bi-heart"></i>
                                     </button>
-                                    @if($product->variants->isNotEmpty())
-                                        <a href="{{ route('product_detail', $product->slug) }}" class="pp-hover-btn">
-                                            <i class="bi bi-bag-plus"></i>
-                                        </a>
-                                    @else
+                                    @php
+                                        // Quick-add from the card: first in-stock variant;
+                                        // all sold out -> fall back to the product page.
+                                        $inStockVariants = $product->variants->filter(fn ($v) => $v->stock > 0);
+                                        $quickVariant = $inStockVariants->first();
+                                    @endphp
+                                    @if($quickVariant)
                                         <button type="button" class="pp-hover-btn add-to-cart"
                                             data-id="{{ $product->id }}" data-name="{{ $product->name }}"
-                                            data-price="{{ $product->sale_price ?? $product->price }}"
+                                            data-variant-id="{{ $quickVariant->id }}"
+                                            data-variant-values="{{ collect([$quickVariant->value_1, $quickVariant->value_2])->filter()->implode(', ') }}"
+                                            data-price="{{ $quickVariant->sale_price ?? $quickVariant->price }}"
                                             data-img="{{ $product->image_url }}">
                                             <i class="bi bi-bag-plus"></i>
                                         </button>
+                                        @if($inStockVariants->count() > 1)
+                                            {{-- Tiny variant chips: pick size/weight straight from the card --}}
+                                            <div class="variant-chips" data-for="{{ $product->id }}">
+                                                @foreach ($inStockVariants as $v)
+                                                    <button type="button" class="variant-chip add-to-cart"
+                                                        data-id="{{ $product->id }}" data-name="{{ $product->name }}"
+                                                        data-variant-id="{{ $v->id }}"
+                                                        data-variant-values="{{ collect([$v->value_1, $v->value_2])->filter()->implode(', ') }}"
+                                                        data-price="{{ $v->sale_price ?? $v->price }}"
+                                                        data-img="{{ $product->image_url }}">{{ $v->value_1 }}</button>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    @else
+                                        <a href="{{ route('product_detail', $product->slug) }}" class="pp-hover-btn">
+                                            <i class="bi bi-bag-plus"></i>
+                                        </a>
                                     @endif
                                 </div>
                             </div>
@@ -504,6 +553,13 @@
 
             <div class="pp-prev">‹</div>
             <div class="pp-next">›</div>
+
+            <div class="text-center mt-4">
+                <a href="{{ route('products') }}" class="main-btn">
+                    <span>View All Products</span>
+                    <span class="shine"></span>
+                </a>
+            </div>
         </div>
     </section>
 
@@ -521,7 +577,7 @@
                         <div class="swiper-slide">
                             <div class="product-card">
                                 <a href="{{ route('product_detail', $product->slug) }}">
-                                    <span class="product-badge hot">New</span>
+                                    <span class="product-badge hot"><svg class="icon"><use href="#i-sparkle"/></svg>New</span>
                                     <div class="product-img">
                                         <img src="{{ $product->image_url }}" alt="{{ $product->name }}">
                                     </div>
@@ -547,17 +603,38 @@
                                         data-img="{{ $product->image_url }}">
                                         <i class="bi bi-heart"></i>
                                     </button>
-                                    @if($product->variants->isNotEmpty())
-                                        <a href="{{ route('product_detail', $product->slug) }}" class="pp-hover-btn">
-                                            <i class="bi bi-bag-plus"></i>
-                                        </a>
-                                    @else
+                                    @php
+                                        // Quick-add from the card: first in-stock variant;
+                                        // all sold out -> fall back to the product page.
+                                        $inStockVariants = $product->variants->filter(fn ($v) => $v->stock > 0);
+                                        $quickVariant = $inStockVariants->first();
+                                    @endphp
+                                    @if($quickVariant)
                                         <button type="button" class="pp-hover-btn add-to-cart"
                                             data-id="{{ $product->id }}" data-name="{{ $product->name }}"
-                                            data-price="{{ $product->sale_price ?? $product->price }}"
+                                            data-variant-id="{{ $quickVariant->id }}"
+                                            data-variant-values="{{ collect([$quickVariant->value_1, $quickVariant->value_2])->filter()->implode(', ') }}"
+                                            data-price="{{ $quickVariant->sale_price ?? $quickVariant->price }}"
                                             data-img="{{ $product->image_url }}">
                                             <i class="bi bi-bag-plus"></i>
                                         </button>
+                                        @if($inStockVariants->count() > 1)
+                                            {{-- Tiny variant chips: pick size/weight straight from the card --}}
+                                            <div class="variant-chips" data-for="{{ $product->id }}">
+                                                @foreach ($inStockVariants as $v)
+                                                    <button type="button" class="variant-chip add-to-cart"
+                                                        data-id="{{ $product->id }}" data-name="{{ $product->name }}"
+                                                        data-variant-id="{{ $v->id }}"
+                                                        data-variant-values="{{ collect([$v->value_1, $v->value_2])->filter()->implode(', ') }}"
+                                                        data-price="{{ $v->sale_price ?? $v->price }}"
+                                                        data-img="{{ $product->image_url }}">{{ $v->value_1 }}</button>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    @else
+                                        <a href="{{ route('product_detail', $product->slug) }}" class="pp-hover-btn">
+                                            <i class="bi bi-bag-plus"></i>
+                                        </a>
                                     @endif
                                 </div>
                             </div>

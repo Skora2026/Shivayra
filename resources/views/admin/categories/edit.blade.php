@@ -154,7 +154,7 @@
                         <input type="file" name="image" id="cat-image" accept="image/*" onchange="previewImage(this)">
                         <div id="upload-placeholder">
                             <div class="image-preview-wrap" id="preview-wrap" style="display:none;">
-                                <img id="img-preview" src="" alt="Preview">
+                                <img id="img-preview" alt="Preview">
                             </div>
                             <i class="fa-solid fa-cloud-arrow-up fa-2x text-muted mb-2" id="upload-icon"></i>
                             <p class="mb-1 fw-500 text-secondary">Click or drag new image here</p>

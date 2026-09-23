@@ -26,7 +26,10 @@ class SendOtpMail extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject('Your Password Reset OTP Code')
+        // The same code serves registration and password reset — keep the
+        // subject flow-neutral ("Password Reset" on a signup email reads as
+        // phishing and invites the spam folder).
+        return $this->subject('Your Shivayra Verification Code')
             ->view('emails.otp-mail');
     }
 }

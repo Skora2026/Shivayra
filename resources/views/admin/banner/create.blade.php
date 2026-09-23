@@ -65,7 +65,12 @@
                         name="image"
                         class="form-control rounded-3"
                         accept="image/*"
+                        data-dropzone
+                        data-preview="#desktop-image-preview"
                         required>
+                    <small data-dropzone-hint style="display:none;"></small>
+                    <img id="desktop-image-preview" alt="Desktop banner preview"
+                         class="rounded-3 border mt-2" style="display:none; max-width:100%;">
                 </div>
 
                 {{-- Mobile Banner Image --}}
@@ -79,7 +84,12 @@
                         id="mobileImageInput"
                         name="mobile_image"
                         class="form-control rounded-3"
-                        accept="image/*">
+                        accept="image/*"
+                        data-dropzone
+                        data-preview="#mobile-image-preview">
+                    <small data-dropzone-hint style="display:none;"></small>
+                    <img id="mobile-image-preview" alt="Mobile banner preview"
+                         class="rounded-3 border mt-2" style="display:none; max-width:100%;">
                 </div>
 
                 {{-- Badge --}}

@@ -73,6 +73,11 @@
     .pay-pending   { background: #F6EBD9; color: #8a6a1f; }
     .pay-failed    { background: #F7E2E4; color: #93333d; }
     .chart-wrap { position: relative; height: 260px; }
+    .page-title-row > div { min-width: 0; }
+    .page-title-row h2 { overflow-wrap: anywhere; }
+    @media (max-width: 575.98px) {
+        .page-title-row { flex-direction: column; align-items: stretch !important; }
+    }
     .mini-img {
         width: 38px; height: 38px;
         object-fit: cover;
@@ -107,7 +112,7 @@
 @endsection
 
 @section('content')
-<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+<div class="page-title-row d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
     <div>
         <h2 class="fw-700 text-dark mb-1">Dashboard</h2>
         <p class="text-muted mb-0">Store performance at a glance — {{ now()->format('l, d M Y') }}</p>

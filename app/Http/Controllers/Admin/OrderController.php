@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\DataTables\OrderDataTable;
 use App\Http\Controllers\Controller;
+use App\Mail\OrderStatusMail;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductVariant;
@@ -40,7 +41,7 @@ class OrderController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'order_status' => 'required|in:pending,processing,completed,cancelled',
+            'order_status' => 'required|in:pending,processing,shipped,completed,cancelled,returned,refunded',
             'payment_status' => 'required|in:pending,paid,failed',
         ]);
 
@@ -53,8 +54,9 @@ class OrderController extends Controller
         }
 
         $restoringStock = $request->input('order_status') === 'cancelled' && $order->order_status !== 'cancelled';
+        $statusChanged = $order->order_status !== $request->input('order_status');
 
-        DB::transaction(function () use ($order, $request, $restoringStock) {
+        DB::transaction(function () use ($order, $request, $restoringStock, $statusChanged) {
             // Restore inventory exactly once, atomically
             if ($restoringStock) {
                 foreach ($order->items as $item) {
@@ -77,8 +79,29 @@ class OrderController extends Controller
             $order->update([
                 'order_status' => $request->input('order_status'),
                 'payment_status' => $request->input('payment_status'),
+                // The delivery anchor moves only when the status itself
+                // changes: stamped on first completion, cleared when leaving
+                // it. A resubmit (e.g. fixing payment on a delivered or
+                // returned order) must never shift the return window.
+                'completed_at' => $statusChanged
+                    ? ($request->input('order_status') === 'completed' ? now() : null)
+                    : $order->completed_at,
             ]);
         });
+
+        // Customer notification for the lifecycle states they care about.
+        // The "ordered" email is already covered at checkout (OrderPlacedMail).
+        if ($statusChanged) {
+            $stateMail = [
+                'shipped'   => 'shipped',
+                'completed' => 'delivered',
+                'cancelled' => 'cancelled',
+            ][$request->input('order_status')] ?? null;
+
+            if ($stateMail !== null) {
+                OrderStatusMail::sendTo($order, $stateMail);
+            }
+        }
 
         return redirect()->back()->with('success', 'Order status updated successfully.');
     }

@@ -65,21 +65,30 @@ body {
   font-family: var(--font-body);
   background-color: var(--ivory);
   color: var(--text-dark);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
+
+/* ================================================
+   TYPOGRAPHY — refined hierarchy
+   ================================================ */
 
 h1, h2, h3, h4, h5, h6, .main-heading {
   font-family: var(--font-display) !important;
   font-weight: 500;
   letter-spacing: 0.01em;
+  line-height: 1.2;
 }
 
-/* Product names: editorial serif, medium weight */
-.product-card h6,
-.product-body h6 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  letter-spacing: 0.02em;
-}
+h1 { font-size: 3.2rem; font-weight: 400; }
+h2 { font-size: 2.4rem; font-weight: 400; }
+h3 { font-size: 1.8rem; font-weight: 500; }
+h4 { font-size: 1.4rem; font-weight: 500; }
+h5 { font-size: 1.1rem; font-weight: 600; }
+h6 { font-size: 0.95rem; font-weight: 600; }
+
+/* Product name typography lives with the card in product.css */
 
 /* Buttons: structured sans, medium weight, slight tracking */
 .btn,
@@ -95,37 +104,34 @@ html {
 
 a {
   text-decoration: none !important;
+  transition: color 0.3s ease;
 }
 
-
-/* main-heading css  */
+/* ================================================
+   MAIN HEADING — editorial luxury style
+   ================================================ */
 
 .main-heading {
-  font-size: 40px;
-  font-weight: 500;
+  font-size: 2.8rem;
+  font-weight: 400;
   position: relative;
-}
-
-.main-heading {
   color: var(--text-dark);
-
+  letter-spacing: 0.02em;
 }
 
 /* subline — small gold uppercase eyebrow */
-
 .creative-subline {
-  font-size: 12px;
-  letter-spacing: 3px;
+  font-size: 11px;
+  letter-spacing: 3.5px;
   text-transform: uppercase;
   color: var(--warm-peach);
   font-weight: 600;
   position: relative;
   display: inline-block;
-  padding-bottom: 8px;
+  padding-bottom: 12px;
 }
 
 /* decorative line */
-
 .creative-subline::after {
   content: "";
   width: 40px;
@@ -137,36 +143,28 @@ a {
   bottom: 0;
 }
 
-/* mobile */
+/* ================================================
+   BUTTONS — refined luxury treatment
+   ================================================ */
 
-@media(max-width:768px) {
-
-  .main-heading {
-    font-size: 30px;
-  }
-
-}
-
-/* ====================================== */
-/* ====================================== */
-
-/* button css */
 .main-btn {
   position: relative;
   display: inline-block;
-  padding: 13px 34px;
+  padding: 14px 40px;
   background: var(--burgundy);
-  border-radius: 2px;
+  border-radius: 0;
   color: #fff;
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-size: 11px;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
-  transition: background 0.25s ease;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  border: 1px solid var(--burgundy);
 }
 
 .main-btn:hover {
-  background: var(--burgundy-hover);
-  color: #fff;
+  background: transparent;
+  color: var(--burgundy);
+  transform: translateY(-2px);
 }
 
 .main-btn span {
@@ -195,104 +193,88 @@ a {
   left: 120%;
 }
 
-/* ================================================ */
-/* ================================================ */
+/* ================================================
+   PRODUCT CARDS — elegant card treatment
+   ================================================ */
 
-/* Products cards css  */
+/* arrows */
+.pp-prev,
+.pp-next {
+  position: absolute;
+  top: 45%;
+  width: 40px;
+  height: 40px;
+  background: var(--burgundy);
+  color: white;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 99;
+  transition: all 0.3s ease;
+  font-size: 1.2rem;
+}
 
+.pp-prev {
+  left: 15px;
+}
 
+.pp-next {
+  right: 15px;
+}
 
+.pp-prev:hover,
+.pp-next:hover {
+  background: var(--deep-forest);
+  transform: scale(1.05);
+}
 
-
-
-  /* arrows */
-
-  .pp-prev,
-  .pp-next {
-      position: absolute;
-      top: 45%;
-      width: 35px;
-      height: 35px;
-      background: var(--burgundy);
-      color: white;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 99
+/* responsive */
+@media(max-width:768px) {
+  section .container {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
   }
+}
 
-  .pp-prev {
-      left: 15px;
-  }
+.productSwiper {
+  height: auto !important;
+  width: 100%;
+  overflow: hidden;
+}
 
-  .pp-next {
-      right: 15px;
-  }
+.swiper-wrapper {
+  align-items: flex-start !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
 
-  /* responsive */
+.swiper-slide {
+  height: auto !important;
+  display: flex;
+}
 
-  @media(max-width:768px) {
-      .product-card {
-          margin-bottom: 20px;
-      }
+.productSwiper .swiper-slide {
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+}
 
-      section .container {
-          padding-left: 10px !important;
-          padding-right: 10px !important;
-      }
-  }
+.slider-section .slider-container {
+  padding-left: 15px !important;
+  padding-right: 15px !important;
+}
 
-  .productSwiper {
-      height: auto !important;
-      width: 100%;
-      overflow: hidden;
-  }
-
-  .swiper-wrapper {
-      align-items: flex-start !important;
-      margin-left: 0 !important;
-      margin-right: 0 !important;
-  }
-
-  .swiper-slide {
-      height: auto !important;
-      display: flex;
-  }
-
-  .productSwiper .swiper-slide {
-      display: flex;
-      justify-content: center;
-      box-sizing: border-box;
-  }
-
-  /* .product-card {
-      height: auto !important;
-      width: 100%;
-      max-width: 100%;
-  } */
-
-  .slider-section .slider-container {
-      padding-left: 15px !important;
-      padding-right: 15px !important;
-  }
-
-  /* ============================================== */
-  /* ============================================== */
-
-/* ============================================
+/* ================================================
    MOBILE TOUCH-TARGET & OVERFLOW HARDENING
-   ============================================ */
+   ================================================ */
 
-/* Sub-pixel swiper rounding can push scrollWidth 1-2px past 100vw */
 html,
 body {
   overflow-x: clip;
 }
 
-/* Tap targets: make small controls comfortably tappable without
-   changing desktop layout (padding grows the hit area, not the glyph) */
 .search-wrapper input {
   padding: 9px 0;
 }
@@ -305,7 +287,6 @@ body {
 }
 
 @media (max-width: 768px) {
-  /* product detail quantity stepper */
   #qtyMinus,
   #qtyPlus {
     min-width: 44px;
@@ -319,23 +300,22 @@ body {
     font-size: 1rem;
   }
 
-  /* listing sidebar filter checkboxes */
   .main-cat-filter,
   .cat-filter {
     width: 18px;
     height: 18px;
   }
 
-  /* carousel arrows on mobile hero */
   .carousel-control-prev,
   .carousel-control-next {
     width: 36px;
     min-height: 36px;
   }
 }
-/* ==================================================
+
+/* ================================================
    FINESSE PASS — micro-interactions & refined details
-   ================================================== */
+   ================================================ */
 
 /* Focus rings: gold, consistent everywhere */
 a:focus-visible,
@@ -348,37 +328,33 @@ textarea:focus-visible {
   outline-offset: 2px;
 }
 
-/* Cards: single elegant hover language */
-.product-card,
+/* Cards: single elegant hover language (product cards are styled in product.css) */
 .category-card,
 .bond-card {
-  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.product-card:hover,
+
 .category-card:hover,
 .bond-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 38px rgba(64, 17, 31, 0.12);
-}
-.product-img img {
-  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-}
-.product-card:hover .product-img img {
-  transform: scale(1.05);
+  transform: translateY(-6px);
+  box-shadow: 0 20px 40px rgba(64, 17, 31, 0.10);
 }
 
 /* Buttons: subtle lift + jewel-tone shadows */
 .btn {
-  transition: transform 0.25s ease, box-shadow 0.25s ease, background-color 0.25s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
 }
+
 .btn:hover {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
+
 .btn-gold,
 .checkout-btn,
 .btn-submit {
   box-shadow: 0 4px 14px rgba(92, 26, 46, 0.18);
 }
+
 .btn-gold:hover,
 .checkout-btn:hover,
 .btn-submit:hover {
@@ -390,13 +366,14 @@ textarea:focus-visible {
 .form-select,
 .input-field {
   border-color: rgba(176, 141, 87, 0.35);
-  transition: border-color 0.25s ease, box-shadow 0.25s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
+
 .form-control:focus,
 .form-select:focus,
 .input-field:focus {
   border-color: var(--warm-peach);
-  box-shadow: 0 0 0 3px rgba(176, 141, 87, 0.14);
+  box-shadow: 0 0 0 3px rgba(176, 141, 87, 0.12);
 }
 
 /* Marquee: keep the band refined */
@@ -405,8 +382,7 @@ textarea:focus-visible {
   opacity: 0.9;
 }
 
-/* Ruby wishlist heart on cards */
-.product-card .add-to-wishlist:hover .icon,
+/* Ruby wishlist heart */
 .wishlist-active .icon {
   color: var(--ruby);
 }
@@ -426,15 +402,61 @@ textarea:focus-visible {
 
 /* Scrollbar, kept slim and on-palette */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
 }
+
 ::-webkit-scrollbar-track {
   background: var(--ivory);
 }
+
 ::-webkit-scrollbar-thumb {
-  background: rgba(176, 141, 87, 0.5);
-  border-radius: 5px;
+  background: rgba(176, 141, 87, 0.4);
+  border-radius: 4px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: var(--warm-peach);
+}
+
+/* ================================================
+   SECTION SPACING — generous luxury rhythm
+   ================================================ */
+
+section {
+  position: relative;
+}
+
+section + section {
+  margin-top: 0;
+}
+
+/* Elegant section dividers */
+.section-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--warm-peach);
+  margin: 0 auto 1.5rem;
+}
+
+/* ================================================
+   RESPONSIVE TYPOGRAPHY
+   ================================================ */
+
+@media(max-width:768px) {
+  .main-heading {
+    font-size: 2rem;
+  }
+
+  h1 { font-size: 2.2rem; }
+  h2 { font-size: 1.8rem; }
+  h3 { font-size: 1.4rem; }
+}
+
+@media(max-width:576px) {
+  .main-heading {
+    font-size: 1.7rem;
+  }
+
+  h1 { font-size: 1.8rem; }
+  h2 { font-size: 1.5rem; }
 }

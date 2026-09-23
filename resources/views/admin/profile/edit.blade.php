@@ -47,7 +47,11 @@
 
                     <div class="col-md-6 mb-3">
                         <label for="profile_pic" class="form-label fw-600 text-dark">{{ __('labels.profile_picture') }}</label>
-                        <input type="file" name="profile_pic" id="profile_pic" class="form-control rounded-3" accept="image/*">
+                        <input type="file" name="profile_pic" id="profile_pic" class="form-control rounded-3" accept="image/*"
+                               data-dropzone data-preview="#profile-pic-preview">
+                        <small data-dropzone-hint style="display:none;"></small>
+                        <img id="profile-pic-preview" alt="New profile picture preview"
+                             class="rounded-circle border mt-2" style="display:none; width:60px; height:60px; object-fit:cover;">
                         @if($user->profile_pic)
                             <div class="mt-2">
                                 <img src="{{ asset('storage/' . $user->profile_pic) }}" alt="Profile Picture" class="rounded-circle border" style="width: 60px; height: 60px; object-fit: cover;">

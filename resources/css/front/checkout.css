@@ -1,96 +1,117 @@
- .checkout-card {
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: var(--primary-shadow);
-        }
+/* ================================================
+   CHECKOUT — refined luxury treatment
+   ================================================ */
 
-        .checkout-card label {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--vibrant-mint);
-            padding-bottom: 5px
-        }
+.checkout-card {
+  background: white;
+  padding: 32px;
+  border-radius: 4px;
+  box-shadow: 0 4px 20px rgba(28, 28, 28, 0.04);
+  border: 1px solid rgba(176, 141, 87, 0.15);
+}
 
-        .summary-card {
-            position: sticky;
-            top: 100px;
-            border-top: 5px solid var(--deep-forest);;
-        }
+.checkout-card label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  padding-bottom: 5px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+}
 
-        .summary-detail {
-            font-size: 14px;
-        }
+.summary-card {
+  position: sticky;
+  top: 100px;
+  border-top: 3px solid var(--burgundy);
+}
 
-        .section-title {
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--deep-forest);
-        }
+.summary-detail {
+  font-size: 14px;
+}
 
-        .form-control {
-            border-radius: 10px;
-            padding: 10px;
-            font-size: 14px !important;
-        }
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 500;
+  margin-bottom: 24px;
+  color: var(--burgundy);
+  font-size: 1.4rem;
+  letter-spacing: 0.02em;
+}
 
-        .form-control:focus {
-            box-shadow: none !important;
-            border-color: var(--deep-forest) !important;
-            box-shadow: 0 0 0 0.15rem rgba(163, 0, 3, 0.25);
-        }
+.form-control {
+  border-radius: 2px;
+  padding: 12px 14px;
+  font-size: 14px !important;
+  border: 1px solid rgba(176, 141, 87, 0.3);
+  transition: all 0.3s ease;
+}
 
-        .payment-box {
-            border: 2px solid #eee;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+.form-control:focus {
+  border-color: var(--warm-peach) !important;
+  box-shadow: 0 0 0 3px rgba(176, 141, 87, 0.1);
+}
 
-        .payment-box:hover {
-            border-color: var(--deep-forest);
-        }
+.payment-box {
+  border: 1px solid rgba(176, 141, 87, 0.2);
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fffdf9;
+}
 
-        .payment-box.active {
-            border-color: var(--deep-forest);
-            background: #fff5f5;
-        }
+.payment-box:hover {
+  border-color: var(--warm-peach);
+}
 
-        .order-btn {
-            background: var(--vibrant-mint);
-            color: white;
-            padding: 14px;
-            border: none;
-            width: 100%;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: 0.3s;
-        }
+.payment-box.active {
+  border-color: var(--burgundy);
+  background: rgba(92, 26, 46, 0.03);
+}
 
-        .order-btn:hover {
-            background: var(--deep-forest);
-        }
+.order-btn {
+  background: var(--burgundy);
+  color: white;
+  padding: 14px;
+  border: none;
+  width: 100%;
+  border-radius: 2px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 12px;
+}
 
-        .total-box {
-            background: #fafafa;
-            padding: 15px;
-            border-radius: 12px;
-        }
+.order-btn:hover {
+  background: var(--burgundy-hover);
+  transform: translateY(-2px);
+}
 
-        .total-box p {
-            font-size: 14px;
-        }
+.total-box {
+  background: var(--champagne);
+  padding: 18px;
+  border-radius: 4px;
+}
 
-        .coupon-box .btn {
-            background: var(--vibrant-mint);
-            color: #fff;
-            border: none;
-            border-radius: 10px;
-            padding: 8px 15px;
-        }
+.total-box p {
+  font-size: 14px;
+}
 
-        .coupon-box .btn:hover {
-            background: var(--deep-forest);
-        }
+.coupon-box .btn {
+  background: var(--burgundy);
+  color: #fff;
+  border: none;
+  border-radius: 2px;
+  padding: 10px 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+.coupon-box .btn:hover {
+  background: var(--burgundy-hover);
+}

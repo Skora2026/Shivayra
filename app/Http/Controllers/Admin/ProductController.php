@@ -121,12 +121,8 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        $product = $this->productService->getDataById($id);
-
-        if ($product && $product->image) {
-            \Storage::disk('public')->delete($product->image);
-        }
-
+        // deleteData() also removes the product's main, gallery and variant
+        // images from disk, so nothing is left orphaned in storage.
         $this->productService->deleteData($id);
 
         return redirect()->route('admin.products.index')

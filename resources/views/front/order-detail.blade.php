@@ -18,9 +18,10 @@
             </h2>
         </div>
         <div class="d-flex align-items-center gap-2">
-            <button onclick="window.print()" class="btn btn-dark rounded-pill px-4 py-2 fw-600 shadow-sm d-flex align-items-center gap-2" style="font-size: 0.88rem; transition: all 0.2s;">
-                <i class="fa-solid fa-file-arrow-down fs-6"></i> Download / Print Invoice
-            </button>
+            <a href="{{ route('order.invoice', $order->order_number) }}" target="_blank" rel="noopener"
+                class="btn btn-dark rounded-pill px-4 py-2 fw-600 shadow-sm d-flex align-items-center gap-2" style="font-size: 0.88rem; transition: all 0.2s;">
+                <i class="fa-solid fa-file-arrow-down fs-6"></i> Download Invoice
+            </a>
         </div>
     </div>
 
@@ -131,44 +132,44 @@
                 </div>
 
                 <div class="row text-center position-relative g-0">
-                    <div class="col-3 timeline-item">
+                    <div class="col-3 timeline-item {{ $step1 ? 'is-done' : 'is-pending' }}">
                         <div class="timeline-icon {{ $step1 ? 'active' : '' }}">
                             <i class="fa-solid fa-clipboard-check"></i>
                         </div>
                         <div class="timeline-content mt-3">
-                            <strong class="d-block text-dark fw-700" style="font-size: 0.88rem;">Placed</strong>
-                            <small class="text-muted d-block" style="font-size: 0.76rem;">Order Confirmed</small>
+                            <strong class="d-block fw-700 timeline-title" style="font-size: 0.88rem;">Placed</strong>
+                            <small class="d-block timeline-sub" style="font-size: 0.76rem;">Order Confirmed</small>
                             <small class="text-success fw-600 d-block mt-1" style="font-size: 0.72rem;">{{ $order->created_at->format('d M, h:i A') }}</small>
                         </div>
                     </div>
 
-                    <div class="col-3 timeline-item">
+                    <div class="col-3 timeline-item {{ $step2 ? 'is-done' : 'is-pending' }}">
                         <div class="timeline-icon {{ $step2 ? 'active' : '' }}">
                             <i class="fa-solid fa-boxes-packing"></i>
                         </div>
                         <div class="timeline-content mt-3">
-                            <strong class="d-block text-dark fw-700" style="font-size: 0.88rem;">Processing</strong>
-                            <small class="text-muted d-block" style="font-size: 0.76rem;">Packing Items</small>
+                            <strong class="d-block fw-700 timeline-title" style="font-size: 0.88rem;">Processing</strong>
+                            <small class="d-block timeline-sub" style="font-size: 0.76rem;">Packing Items</small>
                         </div>
                     </div>
 
-                    <div class="col-3 timeline-item">
+                    <div class="col-3 timeline-item {{ $step3 ? 'is-done' : 'is-pending' }}">
                         <div class="timeline-icon {{ $step3 ? 'active' : '' }}">
                             <i class="fa-solid fa-truck-fast"></i>
                         </div>
                         <div class="timeline-content mt-3">
-                            <strong class="d-block text-dark fw-700" style="font-size: 0.88rem;">Shipped</strong>
-                            <small class="text-muted d-block" style="font-size: 0.76rem;">In Transit</small>
+                            <strong class="d-block fw-700 timeline-title" style="font-size: 0.88rem;">Shipped</strong>
+                            <small class="d-block timeline-sub" style="font-size: 0.76rem;">In Transit</small>
                         </div>
                     </div>
 
-                    <div class="col-3 timeline-item">
+                    <div class="col-3 timeline-item {{ $step4 ? 'is-done' : 'is-pending' }}">
                         <div class="timeline-icon {{ $step4 ? 'active' : '' }}">
                             <i class="fa-solid fa-house-circle-check"></i>
                         </div>
                         <div class="timeline-content mt-3">
-                            <strong class="d-block text-dark fw-700" style="font-size: 0.88rem;">Delivered</strong>
-                            <small class="text-muted d-block" style="font-size: 0.76rem;">Order Completed</small>
+                            <strong class="d-block fw-700 timeline-title" style="font-size: 0.88rem;">Delivered</strong>
+                            <small class="d-block timeline-sub" style="font-size: 0.76rem;">Order Completed</small>
                         </div>
                     </div>
                 </div>
@@ -381,167 +382,17 @@
                     @endif
                 </div>
 
+                {{-- The invoice is not rendered here: it opens on its own printable
+                     page so it can be saved as a PDF and never clutters the dashboard. --}}
                 <div class="text-center mt-4 no-print">
-                    <button onclick="window.print()" class="btn btn-outline-dark w-100 rounded-pill py-2 fw-600 d-flex align-items-center justify-content-center gap-2" style="font-size: 0.88rem;">
-                        <i class="fa-solid fa-print"></i> Download / Print Invoice
-                    </button>
+                    <a href="{{ route('order.invoice', $order->order_number) }}" target="_blank" rel="noopener"
+                        class="btn btn-outline-dark w-100 rounded-pill py-2 fw-600 d-flex align-items-center justify-content-center gap-2" style="font-size: 0.88rem;">
+                        <i class="fa-solid fa-file-arrow-down"></i> Download Invoice
+                    </a>
                 </div>
             </div>
         </div>
-    </div>
-</div>
-
-{{-- DEDICATED PRINTABLE INVOICE CONTAINER (Only visible when printing / window.print()) --}}
-<div id="printableInvoiceSection">
-    {{-- Header Section --}}
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; border-bottom: 2px solid #1e293b; padding-bottom: 12px;">
-        <tr>
-            <td style="vertical-align: top; width: 60%;">
-                @if($settings && $settings->logo)
-                    <img src="{{ asset('storage/' . $settings->logo) }}" alt="{{ config('app.name', 'Shivayra') }}" style="max-height: 50px; margin-bottom: 8px;">
-                @else
-                    <h1 style="font-size: 28px; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.5px;">{{ config('app.name', 'SHIVAYRA') }}</h1>
-                @endif
-                <div style="font-size: 11px; color: #475569; margin-top: 4px; line-height: 1.4;">
-                    <strong>{{ $settings->site_name ?? config('app.name', 'Shivayra') }}</strong><br>
-                    {{ $settings->address ?? 'Main Road, India' }}<br>
-                    Email: {{ $settings->email ?? 'support@shivayra.in' }} | Phone: {{ $settings->phone ?? 'N/A' }}
-                </div>
-            </td>
-            <td style="vertical-align: top; text-align: right; width: 40%;">
-                <div style="font-size: 22px; font-weight: 900; color: #0A9051; letter-spacing: 1px;">TAX INVOICE</div>
-                <div style="font-size: 13px; font-weight: 700; color: #1e293b; margin-top: 4px;">Invoice No: <span style="color: #0f172a;">#{{ $order->order_number }}</span></div>
-                <div style="font-size: 12px; color: #64748b; margin-top: 2px;">Date: {{ $order->created_at->format('d M Y, h:i A') }}</div>
-                <div style="margin-top: 8px;">
-                    <span style="display: inline-block; padding: 4px 10px; font-size: 11px; font-weight: 800; border-radius: 4px; text-transform: uppercase; background-color: {{ strtolower($order->payment_status) === 'paid' ? '#dcfce7' : '#fef3c7' }}; color: {{ strtolower($order->payment_status) === 'paid' ? '#15803d' : '#92400e' }}; border: 1px solid {{ strtolower($order->payment_status) === 'paid' ? '#86efac' : '#fde68a' }};">
-                        PAYMENT {{ strtoupper($order->payment_status) }}
-                    </span>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    {{-- Billing & Shipping Details Grid --}}
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-        <tr>
-            <td style="width: 49%; vertical-align: top; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f8fafc;">
-                <div style="font-size: 11px; font-weight: 800; color: #0A9051; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Billed To (Customer)</div>
-                <div style="font-size: 13px; font-weight: 700; color: #0f172a;">{{ $order->name }}</div>
-                <div style="font-size: 11px; color: #334155; margin-top: 4px; line-height: 1.5;">
-                    <strong>Email:</strong> {{ $order->email }}<br>
-                    <strong>Phone:</strong> {{ $order->phone }}<br>
-                    <strong>Address:</strong> {{ $order->address }}, {{ $order->city }}, {{ $order->state }} - <strong>{{ $order->pincode }}</strong>
-                </div>
-            </td>
-            <td style="width: 2%;"></td>
-            <td style="width: 49%; vertical-align: top; padding: 12px; border: 1px solid #cbd5e1; border-radius: 6px; background-color: #f8fafc;">
-                <div style="font-size: 11px; font-weight: 800; color: #0A9051; text-transform: uppercase; margin-bottom: 6px; letter-spacing: 0.5px;">Shipped To (Destination)</div>
-                <div style="font-size: 13px; font-weight: 700; color: #0f172a;">{{ $order->shipping_name ?? $order->name }}</div>
-                <div style="font-size: 11px; color: #334155; margin-top: 4px; line-height: 1.5;">
-                    <strong>Email:</strong> {{ $order->shipping_email ?? $order->email }}<br>
-                    <strong>Phone:</strong> {{ $order->shipping_phone ?? $order->phone }}<br>
-                    <strong>Address:</strong> {{ $order->shipping_address ?? $order->address }}, {{ $order->shipping_city ?? $order->city }}, {{ $order->shipping_state ?? $order->state }} - <strong>{{ $order->shipping_pincode ?? $order->pincode }}</strong>
-                </div>
-            </td>
-        </tr>
-    </table>
-
-    {{-- Order Metadata Bar --}}
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #cbd5e1; background-color: #ffffff;">
-        <tr style="background-color: #f1f5f9; text-transform: uppercase; font-size: 10px; font-weight: 800; color: #475569; letter-spacing: 0.5px;">
-            <td style="padding: 8px 12px; border-right: 1px solid #cbd5e1; width: 33%;">Payment Method</td>
-            <td style="padding: 8px 12px; border-right: 1px solid #cbd5e1; width: 33%;">Order Status</td>
-            <td style="padding: 8px 12px; width: 34%;">Transaction Reference</td>
-        </tr>
-        <tr>
-            <td style="padding: 8px 12px; font-size: 12px; font-weight: 700; color: #0f172a; border-right: 1px solid #cbd5e1;">
-                {{ strtoupper($order->payment_method) === 'COD' ? 'Cash on Delivery (COD)' : 'Online (Razorpay)' }}
-            </td>
-            <td style="padding: 8px 12px; font-size: 12px; font-weight: 700; color: #0f172a; border-right: 1px solid #cbd5e1;">
-                {{ strtoupper($order->order_status) }}
-            </td>
-            <td style="padding: 8px 12px; font-size: 11px; font-family: monospace; color: #0f172a;">
-                {{ $order->razorpay_payment_id ?? 'N/A' }}
-            </td>
-        </tr>
-    </table>
-
-    {{-- Itemized Products Table --}}
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; border: 1px solid #cbd5e1;">
-        <thead>
-            <tr style="background-color: #1e293b; color: #ffffff; text-transform: uppercase; font-size: 11px; font-weight: 700; letter-spacing: 0.5px;">
-                <th style="padding: 10px 12px; text-align: center; width: 6%; border-right: 1px solid #334155;">#</th>
-                <th style="padding: 10px 12px; text-align: left; width: 54%; border-right: 1px solid #334155;">Item Description</th>
-                <th style="padding: 10px 12px; text-align: center; width: 10%; border-right: 1px solid #334155;">Qty</th>
-                <th style="padding: 10px 12px; text-align: right; width: 15%; border-right: 1px solid #334155;">Unit Price</th>
-                <th style="padding: 10px 12px; text-align: right; width: 15%;">Amount</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach($order->items as $index => $item)
-                <tr style="border-bottom: 1px solid #e2e8f0; font-size: 12px;">
-                    <td style="padding: 10px 12px; text-align: center; color: #64748b; border-right: 1px solid #e2e8f0;">{{ $index + 1 }}</td>
-                    <td style="padding: 10px 12px; font-weight: 600; color: #0f172a; border-right: 1px solid #e2e8f0;">
-                        {{ $item->product_name }}
-                        <div style="font-size: 10px; color: #64748b; font-weight: 400; margin-top: 2px;">Product Code: #{{ $item->product_id }}</div>
-                    </td>
-                    <td style="padding: 10px 12px; text-align: center; font-weight: 700; color: #0f172a; border-right: 1px solid #e2e8f0;">{{ $item->qty }}</td>
-                    <td style="padding: 10px 12px; text-align: right; color: #334155; border-right: 1px solid #e2e8f0;">₹{{ number_format($item->price, 2) }}</td>
-                    <td style="padding: 10px 12px; text-align: right; font-weight: 700; color: #0f172a;">₹{{ number_format($item->total, 2) }}</td>
-                </tr>
-            @endforeach
-        </tbody>
-    </table>
-
-    {{-- Financial Totals & Terms --}}
-    <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; page-break-inside: avoid;">
-        <tr>
-            <td style="width: 52%; vertical-align: top; padding-right: 16px;">
-                <div style="border: 1px solid #cbd5e1; padding: 12px; border-radius: 6px; background-color: #f8fafc;">
-                    <div style="font-size: 11px; font-weight: 800; color: #0f172a; margin-bottom: 6px; text-transform: uppercase;">Declarations & Notes:</div>
-                    <ul style="margin: 0; padding-left: 14px; font-size: 11px; color: #475569; line-height: 1.6;">
-                        <li>This is a computer-generated Tax Invoice and requires no signature.</li>
-                        <li>Goods once sold can be returned per our standard return policy.</li>
-                        <li>For support, email: {{ $settings->email ?? 'support@shivayra.in' }}</li>
-                    </ul>
-                </div>
-            </td>
-            <td style="width: 48%; vertical-align: top;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px; border: 1px solid #cbd5e1;">
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 8px 12px; color: #475569;">Items Subtotal:</td>
-                        <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: #0f172a;">₹{{ number_format($order->subtotal, 2) }}</td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 8px 12px; color: #475569;">Delivery / Shipping Fee:</td>
-                        <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: #0f172a;">
-                            {{ $order->shipping_charge > 0 ? '₹' . number_format($order->shipping_charge, 2) : 'FREE' }}
-                        </td>
-                    </tr>
-                    <tr style="border-bottom: 1px solid #e2e8f0;">
-                        <td style="padding: 8px 12px; color: #475569;">GST Tax:</td>
-                        <td style="padding: 8px 12px; text-align: right; font-weight: 600; color: #0f172a;">₹{{ number_format($order->tax, 2) }}</td>
-                    </tr>
-                    @if($order->discount > 0)
-                        <tr style="border-bottom: 1px solid #e2e8f0;">
-                            <td style="padding: 8px 12px; color: #15803d;">Discount:</td>
-                            <td style="padding: 8px 12px; text-align: right; font-weight: 700; color: #15803d;">-₹{{ number_format($order->discount, 2) }}</td>
-                        </tr>
-                    @endif
-                    <tr style="background-color: #f1f5f9; border-top: 2px solid #0f172a;">
-                        <td style="padding: 10px 12px; font-size: 13px; font-weight: 800; color: #0f172a;">Grand Total Paid:</td>
-                        <td style="padding: 10px 12px; text-align: right; font-size: 16px; font-weight: 800; color: #0A9051;">₹{{ number_format($order->total, 2) }}</td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
-
-    {{-- Invoice Footer --}}
-    <div style="text-align: center; font-size: 11px; color: #64748b; border-top: 1px solid #e2e8f0; padding-top: 12px;">
-        Thank you for shopping with <strong>{{ config('app.name', 'Shivayra') }}</strong>! Visit us at {{ url('/') }}
-    </div>
-</div>
+    </div></div>
 @endsection
 
 @section('styles')
@@ -577,26 +428,43 @@
         position: relative;
         z-index: 2;
     }
+    /* Pending steps: a light grey ring, deliberately receding into the page */
     .timeline-icon {
         width: 38px;
         height: 38px;
         border-radius: 50%;
-        background: #ffffff;
-        border: 3px solid #cbd5e1;
-        color: #94a3b8;
+        background: #f8fafc;
+        border: 3px solid #e6ebf0;
+        color: #c4cdd7;
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto;
         font-size: 0.95rem;
         transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        box-shadow: none;
     }
+    /* Reached steps: fully saturated brand green */
     .timeline-icon.active {
         background: #0A9051;
         border-color: #0A9051;
         color: #ffffff;
         box-shadow: 0 0 0 5px rgba(10, 144, 81, 0.2);
+    }
+
+    /* Labels track the same rule as the icons, so a step that hasn't happened yet
+       reads as clearly lighter instead of every step sitting at full strength. */
+    .timeline-item.is-done .timeline-title {
+        color: #0f172a;
+    }
+    .timeline-item.is-done .timeline-sub {
+        color: #64748b;
+    }
+    .timeline-item.is-pending .timeline-title {
+        color: #a9b5c1;
+    }
+    .timeline-item.is-pending .timeline-sub {
+        color: #c8d2dc;
     }
 
     /* Custom Order Table */
@@ -607,73 +475,12 @@
         background-color: #f8fafc;
     }
 
-    /* Hidden on screen by default */
-    #printableInvoiceSection {
-        display: none !important;
-    }
-
-    /* Strict Media Print Formatting (PDF / Window.print) */
+    /* The invoice is no longer part of this page — it has its own printable sheet
+       (front.invoice). Only the generic .no-print utility is kept, in case a
+       customer still prints this screen. */
     @media print {
-        @page {
-            size: A4 portrait;
-            margin: 10mm 12mm;
-        }
-
-        /* Explicitly hide top ticker, navbar, search bar, footer, floating elements without touching layout files */
-        .nav-top-section, .nav-top, .marquee, #mainNavbar, .navbar, .search-form, .search-container,
-        #mobileSearch, .search-wrapper, #mobileOffcanvas, .offcanvas-mobile, #offcanvasOverlay,
-        .offcanvas-overlay, #cartPanel, .cart-panel, .footer-section, footer, header, nav,
-        .no-print, .cart-fab, .badge-count, #toast, #wishToast, .btn, button, .alert {
+        .no-print {
             display: none !important;
-            visibility: hidden !important;
-            height: 0 !important;
-            max-height: 0 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            overflow: hidden !important;
-            opacity: 0 !important;
-        }
-
-        html, body {
-            background: #ffffff !important;
-            color: #000000 !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-            font-family: Arial, Helvetica, sans-serif !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-
-        main, #app, .container, .container-fluid {
-            width: 100% !important;
-            max-width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #ffffff !important;
-            box-shadow: none !important;
-            border: none !important;
-        }
-
-        /* Hide screen cards & timeline on print */
-        .card, .timeline-wrapper {
-            display: none !important;
-        }
-
-        /* Show ONLY printable invoice section */
-        #printableInvoiceSection {
-            display: block !important;
-            visibility: visible !important;
-            position: relative !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #ffffff !important;
-            color: #000000 !important;
-        }
-
-        #printableInvoiceSection * {
-            visibility: visible !important;
         }
     }
 </style>

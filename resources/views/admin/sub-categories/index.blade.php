@@ -88,7 +88,7 @@
 </div>
 
 <div class="dt-card">
-    <div class="dt-card-body">
+    <div class="dt-card-body table-responsive">
         {{-- Custom Filter --}}
         <div class="row mb-4 align-items-center">
             <div class="col-md-3">

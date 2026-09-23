@@ -1,256 +1,580 @@
+/* ================================================
+   PRODUCT LISTING — refined luxury treatment
+   ================================================ */
+
 .filter-box {
-        background: #fff;
-        border-radius: 16px;
-        padding: 15px;
-        box-shadow: 0 0 10px rgba(0,0,0,.05);
-    }
-    .filter-btn {
-        width: 100%;
-        text-align: left;
-        background: #fff !important;
-        border: none;
-        padding: 3px 12px;
-        font-weight: 600;
-        font-size: 14px;
-        cursor: pointer;
-        border-radius: 6px;
-    }
-    .filter-content {
-        padding: 8px 12px;
-    }
-    .filter-content label {
-        font-size: 13px;
-        cursor: pointer;
-        display: block;
-        margin-bottom: 5px;
-    }
-    .color-dot {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        cursor: pointer;
-        border: 2px solid #ddd;
-        transition: all 0.2s;
-    }
-    .color-dot.selected {
-        border: 2px solid #28a745;
-        box-shadow: 0 0 0 2px #fff, 0 0 0 3px #28a745;
-    }
-    .color-dot.red { background: #dc3545; }
-    .color-dot.black { background: #212529; }
-    .color-dot.blue { background: #0d6efd; }
+  background: #fffdf9;
+  border-radius: 4px;
+  padding: 18px;
+  border: 1px solid rgba(176, 141, 87, 0.15);
+}
 
-    
-    .product-card {
-        background: #fff;
-        border-radius: 12px;
-        overflow: hidden;
-        transition: all 0.3s;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        height: 100%;
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-    }
-    .product-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.12);
-    }
-    .product-img {
-        position: relative;
-        overflow: hidden;
-        aspect-ratio: 1/1;
-        background: #f8f9fa;
-    }
-    .product-img img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-    .product-badge {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        background: var(--burgundy);
-        color: #F3EDE4;
-        padding: 4px 12px;
-        border-radius: 2px;
-        font-size: 10px;
-        font-weight: 600;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        z-index: 1;
-    }
-    .product-body {
-        padding: 12px;
-        flex-grow: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-    .product-body h6 {
-        font-size: 14px;
-        font-weight: 600;
-        margin-bottom: 8px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-    .pp-price strong {
-        font-size: 16px;
-        color: var(--burgundy);
-    }
-    .pp-price del {
-        font-size: 13px;
-        color: #A39A8E;
-        margin-left: 8px;
-    }
-    .pp-hover {
-        display: flex;
-        justify-content: center;
-        gap: 12px;
-        padding: 12px;
-        border-top: 1px solid var(--gold-hairline);
-    }
-    .pp-hover-btn {
-        width: 36px;
-        height: 36px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--champagne);
-        border-radius: 50%;
-        color: var(--burgundy);
-        text-decoration: none;
-        border: 1px solid transparent;
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .pp-hover-btn:hover {
-        background: var(--burgundy);
-        color: #F3EDE4;
-    }
-    
-    .mobile-filter-bar {
-        display: flex;
-        overflow-x: auto;
-        gap: 8px;
-        padding: 10px 0;
-    }
-    .filter-chip {
-        white-space: nowrap;
-        border: 1px solid #ddd;
-        padding: 6px 14px;
-        border-radius: 4px;
-        background: #fff;
-        font-size: 13px;
-        cursor: pointer;
-    }
-    .filter-chip.active {
-        background: var(--burgundy);
-        color: #F3EDE4;
-        border-color: var(--burgundy);
-    }
-    .mobile-filter-content {
-        margin-top: 10px;
-    }
-    .filter-panel {
-        display: none;
-        background: #fff;
-        padding: 10px;
-        border-radius: 12px;
-        margin-bottom: 10px;
-        border: 1px solid #eee;
-    }
-    .filter-panel.active {
-        display: block;
-    }
-    .filter-panel label {
-        display: inline-block;
-        margin-right: 15px;
-        padding: 6px 0;
-        font-size: 14px;
-        cursor: pointer;
-    }
-    .grid-btn {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
-        padding: 4px 12px;
-        font-size: 14px;
-        cursor: pointer;
-    }
-    .grid-btn.active {
-        background: var(--burgundy) !important;
-        color: #F3EDE4 !important;
-        border-color: var(--burgundy) !important;
-    }
-    .product-grid {
-        transition: all 0.3s ease;
-    }
+.filter-btn {
+  width: 100%;
+  text-align: left;
+  background: #fffdf9 !important;
+  border: none;
+  padding: 6px 14px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  border-radius: 2px;
+  letter-spacing: 0.5px;
+}
 
-    /* Premium Price Range Slider */
-    .price-slider {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 100%;
-        height: 6px;
-        border-radius: 10px;
-        background: #e5e0d8; /* Light luxury grey/cream background */
-        outline: none;
-        margin: 15px 0;
-        cursor: pointer;
-    }
+.filter-content {
+  padding: 8px 14px;
+}
 
-    /* Chrome, Safari, Opera and Edge Track */
-    .price-slider::-webkit-slider-runnable-track {
-        width: 100%;
-        height: 6px;
-        cursor: pointer;
-        border-radius: 10px;
-        background: transparent; /* Colored dynamically by JS background gradient */
-    }
+.filter-content label {
+  font-size: 13px;
+  cursor: pointer;
+  display: block;
+  margin-bottom: 6px;
+}
 
-    /* Firefox Track */
-    .price-slider::-moz-range-track {
-        width: 100%;
-        height: 6px;
-        cursor: pointer;
-        border-radius: 10px;
-        background: transparent;
-    }
+.color-dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid rgba(176, 141, 87, 0.3);
+  transition: all 0.25s ease;
+}
 
-    /* Chrome, Safari, Opera and Edge Thumb */
-    .price-slider::-webkit-slider-thumb {
-        height: 18px;
-        width: 18px;
-        border-radius: 50%;
-        background: var(--burgundy); /* Deep burgundy */
-        border: 2px solid var(--gold-bright); /* Champagne Gold border */
-        cursor: pointer;
-        -webkit-appearance: none;
-        margin-top: -6px; /* Align center with track */
-        box-shadow: 0 2px 5px rgba(0,0,0,0.25);
-        transition: transform 0.15s ease, background-color 0.15s ease;
-    }
-    .price-slider:hover::-webkit-slider-thumb {
-        background: var(--gold-bright); /* Champagne gold on hover */
-        border-color: var(--burgundy);
-        transform: scale(1.2);
-    }
+.color-dot.selected {
+  border: 2px solid var(--burgundy);
+  box-shadow: 0 0 0 3px rgba(92, 26, 46, 0.15);
+}
 
-    /* Firefox Thumb */
-    .price-slider::-moz-range-thumb {
-        height: 16px;
-        width: 16px;
-        border-radius: 50%;
-        background: #111111;
-        border: 2px solid #C5A880;
-        cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.25);
-        transition: transform 0.15s ease, background-color 0.15s ease;
-    }
-    .price-slider:hover::-moz-range-thumb {
-        background: #C5A880;
-        border-color: #111111;
-        transform: scale(1.2);
-    }
+.color-dot.red { background: #dc3545; }
+.color-dot.black { background: #212529; }
+.color-dot.blue { background: #0d6efd; }
+
+.product-card {
+  position: relative;
+  background: var(--card-white);
+  border-radius: 2px;
+  overflow: hidden;
+  border: 1px solid var(--gold-hairline);
+  height: 100%;
+  width: 100%;
+  /* Grid, not flex: it lets the action row share the media cell so it can sit
+     over the image's lower edge without needing a wrapper element. */
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr;
+  box-shadow:
+    0 1px 2px rgba(28, 28, 28, 0.03),
+    0 10px 26px rgba(64, 17, 31, 0.05);
+  transition:
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.55s ease;
+}
+
+/* Cell 1 = the media. Storefront cards wrap it in a link; the wishlist drawer
+   renders the media box on its own, so accept either as the first cell. */
+.product-card > a,
+.product-card > .product-img {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+/* Cell 2 = the text block, which absorbs any leftover column height */
+.product-card > .product-body {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+/* A gold rule that draws itself in along the top edge */
+.product-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold-bright),
+    var(--warm-peach),
+    transparent
+  );
+  transform: scaleX(0);
+  transform-origin: 50% 50%;
+  transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 3;
+}
+
+.product-card:hover,
+.product-card:focus-within {
+  transform: translateY(-8px);
+  border-color: var(--warm-peach);
+  box-shadow:
+    0 2px 6px rgba(28, 28, 28, 0.04),
+    0 24px 50px rgba(64, 17, 31, 0.14),
+    0 0 0 1px rgba(176, 141, 87, 0.18);
+}
+
+.product-card:hover::before,
+.product-card:focus-within::before {
+  transform: scaleX(1);
+}
+
+.product-img {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  aspect-ratio: 1/1;
+  background: linear-gradient(160deg, var(--champagne) 0%, #fffdf9 100%);
+}
+
+.product-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition:
+    transform 1s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.6s ease;
+}
+
+/* A soft light sweep across the piece — the glint of a display case */
+.product-img::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 30%,
+    rgba(255, 255, 255, 0.5) 50%,
+    transparent 70%
+  );
+  transform: translateX(-130%);
+  transition: transform 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.product-card:hover .product-img img,
+.product-card:focus-within .product-img img {
+  transform: scale(1.07);
+  filter: saturate(1.06) contrast(1.02);
+}
+
+.product-card:hover .product-img::after,
+.product-card:focus-within .product-img::after {
+  transform: translateX(130%);
+}
+
+/* `.hot` is targeted too so it outranks the duplicate in header.css */
+.product-badge,
+.product-badge.hot {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  background: linear-gradient(135deg, var(--ruby) 0%, var(--ruby-deep) 100%);
+  color: #FBF3F1;
+  padding: 5px 13px;
+  border-radius: 0;
+  font-size: 8.5px;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  border: 1px solid rgba(201, 169, 106, 0.45);
+  box-shadow: 0 4px 14px rgba(64, 17, 31, 0.28);
+  z-index: 3;
+}
+
+/* The `.hot` / `.new` badge variant carries an inline glyph */
+.product-badge.hot {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.product-body {
+  padding: 18px 18px 16px;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.product-card h6,
+.product-body h6 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: 0.03em;
+  line-height: 1.35;
+  color: var(--text-dark);
+  transition: color 0.4s ease;
+}
+
+.product-card:hover .product-body h6,
+.product-card:focus-within .product-body h6 {
+  color: var(--burgundy);
+}
+
+.pp-price {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.pp-price strong {
+  font-family: var(--font-display);
+  font-size: 19px;
+  color: var(--burgundy);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.pp-price del {
+  font-size: 12.5px;
+  color: #A39A8E;
+  margin-left: 8px;
+  font-weight: 400;
+}
+
+/* Actions share the media cell, pinned to its lower edge. They are siblings of
+   the product link — never inside it — so a tap never also follows the link. */
+.pp-hover {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  z-index: 4;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  background: linear-gradient(
+    180deg,
+    rgba(64, 17, 31, 0) 0%,
+    rgba(64, 17, 31, 0.5) 100%
+  );
+  transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Pointer devices hold the row back until the card is engaged. Touch devices
+   never match this query, so there the buttons stay visible and tappable. */
+@media (hover: hover) and (pointer: fine) {
+  .pp-hover {
+    opacity: 0;
+    transform: translateY(12px);
+    pointer-events: none;
+  }
+
+  .product-card:hover .pp-hover,
+  .product-card:focus-within .pp-hover {
+    opacity: 1;
+    transform: translateY(0);
+    pointer-events: auto;
+  }
+}
+
+.pp-hover-btn {
+  width: 38px;
+  height: 38px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card-white);
+  border: 1px solid var(--gold-hairline);
+  border-radius: 50%;
+  color: var(--deep-forest);
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(176, 141, 87, 0.12);
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease,
+    box-shadow 0.35s ease,
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pp-hover-btn:hover,
+.pp-hover-btn:focus-visible {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+  color: var(--champagne);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(64, 17, 31, 0.28);
+}
+
+/* Honour reduced-motion preferences: keep the look, drop the movement */
+@media (prefers-reduced-motion: reduce) {
+  .product-card,
+  .product-card::before,
+  .product-img img,
+  .product-img::after,
+  .pp-hover,
+  .pp-hover-btn,
+  .product-body h6 {
+    transition: none !important;
+  }
+
+  .product-card:hover,
+  .product-card:focus-within,
+  .product-card:hover .product-img img,
+  .product-card:focus-within .product-img img,
+  .pp-hover-btn:hover {
+    transform: none;
+  }
+
+  /* Reveal by opacity alone, with no lateral slide */
+  .pp-hover {
+    transform: none !important;
+  }
+
+  .product-card:hover .product-img::after,
+  .product-card:focus-within .product-img::after {
+    transform: translateX(-130%);
+  }
+}
+
+/* Ruby wishlist heart on cards */
+.product-card .add-to-wishlist:hover .icon {
+  color: var(--ruby);
+}
+
+/* Cards stack flush on narrow screens */
+@media (max-width: 768px) {
+  .product-card {
+    margin-bottom: 20px;
+  }
+}
+
+.mobile-filter-bar {
+  display: flex;
+  overflow-x: auto;
+  gap: 8px;
+  padding: 10px 0;
+  scrollbar-width: none;
+}
+
+.mobile-filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip {
+  white-space: nowrap;
+  border: 1px solid rgba(176, 141, 87, 0.3);
+  padding: 8px 16px;
+  border-radius: 2px;
+  background: #fffdf9;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  font-weight: 500;
+}
+
+.filter-chip.active {
+  background: var(--burgundy);
+  color: #F3EDE4;
+  border-color: var(--burgundy);
+}
+
+.mobile-filter-content {
+  margin-top: 10px;
+}
+
+.filter-panel {
+  display: none;
+  background: #fffdf9;
+  padding: 14px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(176, 141, 87, 0.15);
+}
+
+.filter-panel.active {
+  display: block;
+}
+
+.filter-panel label {
+  display: inline-block;
+  margin-right: 16px;
+  padding: 6px 0;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.grid-btn {
+  background: var(--champagne);
+  border: 1px solid rgba(176, 141, 87, 0.2);
+  padding: 6px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.grid-btn.active {
+  background: var(--burgundy) !important;
+  color: #F3EDE4 !important;
+  border-color: var(--burgundy) !important;
+}
+
+.product-grid {
+  transition: all 0.3s ease;
+}
+
+/* ================================================
+   PREMIUM PRICE RANGE SLIDER
+   ================================================ */
+
+.price-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(176, 141, 87, 0.25);
+  outline: none;
+  margin: 15px 0;
+  cursor: pointer;
+}
+
+.price-slider::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  border-radius: 2px;
+  background: transparent;
+}
+
+.price-slider::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  border-radius: 2px;
+  background: transparent;
+}
+
+.price-slider::-webkit-slider-thumb {
+  height: 18px;
+  width: 18px;
+  border-radius: 50%;
+  background: var(--burgundy);
+  border: 2px solid var(--gold-bright);
+  cursor: pointer;
+  -webkit-appearance: none;
+  margin-top: -7px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.price-slider:hover::-webkit-slider-thumb {
+  background: var(--gold-bright);
+  border-color: var(--burgundy);
+  transform: scale(1.15);
+}
+
+.price-slider::-moz-range-thumb {
+  height: 16px;
+  width: 16px;
+  border-radius: 50%;
+  background: var(--burgundy);
+  border: 2px solid var(--gold-bright);
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.price-slider:hover::-moz-range-thumb {
+  background: var(--gold-bright);
+  border-color: var(--burgundy);
+  transform: scale(1.15);
+}
+
+/* ---------- Variant quick-pick chips (card hover) ----------
+   On cards with 2+ in-stock variants, tiny chips appear under the action
+   row so the customer picks size/weight directly from the card instead of
+   silently getting the first in-stock variant. Each chip IS an add-to-cart
+   button for that exact variant; the round + button stays "first variant". */
+.variant-chips {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: end;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px 10px;
+  transform: translateY(-40px); /* sit above the action row */
+}
+
+.variant-chip {
+  font-family: var(--font-body, "Montserrat", sans-serif);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: var(--card-white);
+  color: var(--deep-forest);
+  border: 1px solid var(--gold-hairline);
+  box-shadow: 0 2px 8px rgba(176, 141, 87, 0.12);
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    border-color 0.3s ease,
+    color 0.3s ease,
+    box-shadow 0.3s ease,
+    transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.variant-chip:hover,
+.variant-chip:focus-visible {
+  background: var(--burgundy);
+  border-color: var(--burgundy);
+  color: var(--champagne);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(64, 17, 31, 0.24);
+}
+
+/* Chips share the reveal animation of the action row */
+@media (hover: hover) and (pointer: fine) {
+  .variant-chips {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease, transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateY(2px);
+  }
+
+  .product-card:hover .variant-chips,
+  .product-card:focus-within .variant-chips {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-40px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .variant-chip,
+  .variant-chips {
+    transition: none !important;
+    transform: none !important;
+  }
+
+  .product-card:hover .variant-chips {
+    transform: translateY(-40px) !important;
+  }
+}
+
+/* Touch devices: chips always visible above the always-visible action row */
+@media (hover: none) {
+  .variant-chips {
+    transform: translateY(-40px);
+  }
+}

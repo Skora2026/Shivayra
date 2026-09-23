@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <img src="/images/empty-state.png" alt="" width="240" class="mb-4">
                 <h2 class="main-heading mb-2">Your cart is empty</h2>
                 <p class="text-muted mb-4">Add something beautiful before checking out.</p>
-                <a href="/products" class="btn btn-gold px-4 py-2">Continue Shopping</a>
+                <a href="/product" class="btn btn-gold px-4 py-2">Continue Shopping</a>
             </div>`;
         return;
     }

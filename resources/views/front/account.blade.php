@@ -38,6 +38,66 @@
         <div class="tab-content" id="accountTabsContent">
             {{-- Pane 1: Orders --}}
             <div class="tab-pane fade show active" id="orders-pane" role="tabpanel" aria-labelledby="orders-tab" tabindex="0">
+                @php
+                    $reviewableItems = collect();
+                    $returnWindowDays = \App\Models\Setting::first()?->return_window_days ?? 7;
+                    foreach ($orders as $o) {
+                        if ($o->order_status === 'completed') {
+                            foreach ($o->items as $it) { $reviewableItems->push($it->loadMissing('product')); }
+                        }
+                    }
+                @endphp
+
+                @if($reviewableItems->isNotEmpty())
+                    <div class="p-3 mb-4" style="background:#fffdf9; border:1px solid var(--gold-hairline); border-radius:4px;">
+                        <h5 class="mb-3" style="font-family:var(--font-display); font-weight:600;">
+                            <svg class="icon" style="color:var(--warm-peach);"><use href="#i-star"/></svg>
+                            Rate your purchases
+                        </h5>
+                        <div class="row g-3">
+                            @foreach($reviewableItems as $it)
+                                @php
+                                    $alreadyReviewed = $it->review()->exists();
+                                    $hasReturn = (bool) $it->returnRequest()->exists();
+                                    $inWindow = ($it->order->updated_at ?? $it->order->created_at)->copy()->addDays($returnWindowDays)->isFuture();
+                                    $isReturnable = $it->product?->is_returnable ?? true;
+                                @endphp
+                                <div class="col-md-6">
+                                    <div class="d-flex align-items-center gap-3 p-2" style="border:1px solid rgba(176,141,87,.2); border-radius:4px;">
+                                        <img src="{{ $it->product?->image_url }}" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:4px;">
+                                        <div class="flex-grow-1" style="min-width:0;">
+                                            <div class="text-truncate fw-600" style="font-size:.9rem;">{{ $it->product_name }}</div>
+                                            <small class="text-muted">{{ $it->order->order_number }}</small>
+                                            <div class="d-flex gap-2 mt-1 flex-wrap">
+                                                @if($alreadyReviewed)
+                                                    <span class="badge" style="background:rgba(176,141,87,.15); color:#6E5A42; font-weight:600;">
+                                                        <svg class="icon"><use href="#i-check"/></svg> Reviewed
+                                                    </span>
+                                                @else
+                                                    <a href="{{ route('review.form', $it->id) }}" class="badge text-decoration-none" style="background:var(--burgundy); color:#F3EDE4; font-weight:600; letter-spacing:.05em;">
+                                                        <svg class="icon"><use href="#i-star"/></svg> Write review
+                                                    </a>
+                                                @endif
+
+                                                @if($hasReturn)
+                                                    @php $ret = $it->returnRequest; @endphp
+                                                    <span class="badge" style="background:rgba(155,27,48,.1); color:var(--ruby-deep); font-weight:600;">
+                                                        Return: {{ $ret->status }}
+                                                    </span>
+                                                @elseif($isReturnable && $inWindow)
+                                                    <a href="{{ route('return.form', $it->id) }}" class="badge text-decoration-none" style="background:transparent; border:1px solid var(--ruby-hairline); color:var(--ruby); font-weight:600;">
+                                                        <svg class="icon"><use href="#i-refresh"/></svg> Return item
+                                                    </a>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
+
                 @if($orders->isEmpty())
                     <div class="text-center py-5">
                         <div class="mb-3">

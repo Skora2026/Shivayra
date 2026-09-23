@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Your Password Reset OTP</title>
+    <title>Your Verification Code</title>
 </head>
 <body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; color: #333;">
     <div style="max-width: 500px; margin: 0 auto; background-color: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); border: 1px solid #eef2f5;">
         
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #004727 0%, #0A9051 100%); padding: 25px; text-align: center; color: #ffffff;">
-            <h1 style="margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px;">Password Reset Request</h1>
+            <h1 style="margin: 0; font-size: 22px; font-weight: 700; letter-spacing: 0.5px;">Email Verification Request</h1>
         </div>
 
         <!-- Body -->
@@ -19,7 +19,7 @@
                 Hello,
             </p>
             <p style="font-size: 15px; line-height: 1.6; color: #4a5568; margin-bottom: 25px; text-align: left;">
-                We received a request to reset the password for your account. Please use the following 6-digit OTP to complete your password reset. This code is valid for 15 minutes.
+                We received a request to verify your email address. Please use the following 6-digit code to complete your verification. This code is valid for 15 minutes.
             </p>
 
             <!-- OTP Code Box -->

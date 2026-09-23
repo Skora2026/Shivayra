@@ -91,7 +91,7 @@
 </div>
 
 <div class="dt-card">
-    <div class="dt-card-body">
+    <div class="dt-card-body table-responsive">
         {{ $dataTable->table(['class' => 'table table-hover align-middle']) }}
     </div>
 </div>

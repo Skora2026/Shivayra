@@ -44,10 +44,113 @@ document.querySelectorAll(".productSwiper").forEach((slider) => {
 
 document.addEventListener("DOMContentLoaded", function () {
     // ---------- CART LOGIC ----------
+    // Source of truth: localStorage for guests; the server cart_items table
+    // for logged-in customers (follows the user across devices, survives
+    // cache clears). On login the local list is merged into the server rows.
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const IS_AUTH = document.body.dataset.auth === "1";
+    let cartBusy = false; // serialize server syncs
+    // Authenticated sessions must hydrate the server cart before pushing
+    // mutations, or a stale local list could wipe rows added on another
+    // device. Guest sessions sync nothing, so they are always "ready".
+    let hydrationDone = !IS_AUTH;
 
     function saveCart() {
         localStorage.setItem("cart", JSON.stringify(cart));
+    }
+
+    function cartPayload() {
+        return cart.map((p) => ({ id: p.id, qty: p.qty, variantId: p.variantId ?? null }));
+    }
+
+    async function serverSync() {
+        if (!IS_AUTH || !hydrationDone || cartBusy) return;
+        cartBusy = true;
+        try {
+            await fetch("/cart/sync", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.content || "",
+                    "Accept": "application/json",
+                },
+                body: JSON.stringify({ items: cartPayload() }),
+            });
+        } catch (err) {
+            /* offline: local cart remains the truth, retried on next change */
+        } finally {
+            cartBusy = false;
+        }
+    }
+
+    // Login/registration merge: push the pre-login guest items with ADD
+    // semantics (server sums quantities, never shrinks or deletes other-device
+    // rows), then adopt the merged server cart. This is the hydration step
+    // itself, so it must not go through serverSync()'s hydrationDone gate —
+    // that gate exists to stop post-hydration pushes from stale lists.
+    async function mergeOnLogin() {
+        if (!IS_AUTH) return;
+        const local = JSON.parse(localStorage.getItem("cart")) || [];
+        if (local.length) {
+            try {
+                await fetch("/cart/sync", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.content || "",
+                        "Accept": "application/json",
+                    },
+                    body: JSON.stringify({
+                        items: local.map((p) => ({ id: p.id, qty: p.qty, variantId: p.variantId ?? null })),
+                        merge: true,
+                    }),
+                });
+            } catch (err) {
+                /* offline: adoption below keeps whatever the server has */
+            }
+        }
+        try {
+            const res = await fetch("/cart", { headers: { "Accept": "application/json" } });
+            if (res.ok) {
+                const data = await res.json();
+                if (Array.isArray(data.items)) {
+                    cart = data.items.map((row) => ({
+                        id: row.id,
+                        name: row.name,
+                        variantId: row.variantId,
+                        variantValues: row.variantValues || null,
+                        price: parseFloat(row.price) || 0,
+                        img: row.img,
+                        qty: parseInt(row.qty, 10) || 1,
+                    }));
+                    saveCart();
+                }
+            }
+        } catch (err) {
+            /* offline: keep whatever we have locally */
+        }
+    }
+
+    // Run once per page load — on authenticated pages this hydrates the
+    // server cart (and merges any pre-login local additions), then unlocks
+    // mutation syncing. A body flag exposes readiness to tests/scripts.
+    if (IS_AUTH) {
+        mergeOnLogin().then(() => {
+            hydrationDone = true;
+            document.body.dataset.cartHydrated = "1";
+            updateCart();
+
+            // Fresh device + direct /checkout visit: checkout.js rendered its
+            // empty-state before the server cart arrived. Once hydration has
+            // actually delivered items, reload so the page re-reads them.
+            if (
+                cart.length > 0 &&
+                window.location.pathname === "/checkout" &&
+                !document.getElementById("checkoutForm")
+            ) {
+                window.location.reload();
+            }
+        });
     }
 
     function updateCart() {
@@ -105,12 +208,14 @@ document.addEventListener("DOMContentLoaded", function () {
         if (cart[i].qty <= 0) cart.splice(i, 1);
         saveCart();
         updateCart();
+        serverSync();
     };
 
     window.removeItem = function (i) {
         cart.splice(i, 1);
         saveCart();
         updateCart();
+        serverSync();
     };
 
     function toast() {
@@ -121,16 +226,21 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function attachCartEvents() {
-        document.querySelectorAll(".add-to-cart").forEach((btn) => {
-            // Remove old listener to avoid duplicates
-            btn.removeEventListener("click", cartClickHandler);
-            btn.addEventListener("click", cartClickHandler);
-        });
-    }
+    // Cart & wishlist clicks are delegated ONCE at document level. Per-node
+    // listeners were silently lost on Swiper-managed slides (cloning/reordering
+    // replaces nodes), which left slider card buttons dead.
+    document.addEventListener("click", function (e) {
+        const cartBtn = e.target.closest(".add-to-cart");
+        if (cartBtn) {
+            cartClickHandler.call(cartBtn, e);
+            return;
+        }
+        const wishBtn = e.target.closest(".add-to-wishlist");
+        if (wishBtn) wishlistClickHandler.call(wishBtn, e);
+    });
 
     function cartClickHandler(e) {
-        let btn = e.currentTarget;
+        let btn = this;
         let id = btn.dataset.id;
         let variantId = btn.dataset.variantId || "";
         // Product detail pages provide a quantity selector; cards add one at a time.
@@ -161,6 +271,7 @@ document.addEventListener("DOMContentLoaded", function () {
         toast();
         saveCart();
         updateCart();
+        serverSync();
     }
 
     // ---------- WISHLIST LOGIC ----------
@@ -227,12 +338,16 @@ document.addEventListener("DOMContentLoaded", function () {
                 const wasPrice = p.was ? parseInt(p.was) : 0;
                 const hasDiscount = wasPrice > parseInt(p.price);
                 const detailUrl = p.slug ? `/product-detail/${p.slug}` : "#";
+                // The badge and image sit inside the link, matching the Blade cards,
+                // so clicking the photo opens the product here too.
                 html += `<div class="col-md-3 col-6 mb-4">
                             <div class="product-card">
-                                <span class="product-badge hot"><svg class="icon"><use href="#i-heart-fill"/></svg> Wishlist</span>
-                                <div class="product-img">
-                                    <img src="${p.img}">
-                                </div>
+                                <a href="${detailUrl}">
+                                    <span class="product-badge hot"><svg class="icon"><use href="#i-heart-fill"/></svg> Wishlist</span>
+                                    <div class="product-img">
+                                        <img src="${p.img}">
+                                    </div>
+                                </a>
                                 <div class="product-body">
                                     <h6>${p.name}</h6>
                                     <div class="pp-price">
@@ -290,15 +405,8 @@ document.addEventListener("DOMContentLoaded", function () {
         updateWishlistIcons();
     };
 
-    function attachWishlistEvents() {
-        document.querySelectorAll(".add-to-wishlist").forEach((btn) => {
-            btn.removeEventListener("click", wishlistClickHandler);
-            btn.addEventListener("click", wishlistClickHandler);
-        });
-    }
-
     function wishlistClickHandler(e) {
-        let btn = e.currentTarget;
+        let btn = this;
         let id = btn.dataset.id;
         let index = wishlist.findIndex((p) => p.id == id);
 
@@ -345,10 +453,11 @@ document.addEventListener("DOMContentLoaded", function () {
         updateCart();
         updateWishlistCount();
         renderWishlist();
-        attachCartEvents();
-        attachWishlistEvents();
         updateWishlistIcons();
         attachImageFallbacks();
+
+        // Authenticated: the fetch in mergeOnLogin() (fired above) resolves
+        // and re-renders with the server cart; nothing else needed here.
     }
 
     // Any product/remote image that fails to load falls back to the local
@@ -365,24 +474,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
     init();
 
-    // For Swiper slider - when slide changes, reattach events
-    if (typeof Swiper !== "undefined") {
-        // Sliders clone/reposition slides, so listeners must be reattached
-        document
-            .querySelector(".productSwiper")
-            ?.addEventListener("slideChange", function () {
-                setTimeout(() => {
-                    attachCartEvents();
-                    attachWishlistEvents();
-                    updateWishlistIcons();
-                }, 100);
-            });
-    }
-
-    // Also watch for dynamically added products (if any)
+    // Keep heart-icon fill state in sync on Swiper slides and on dynamically
+    // rendered nodes (wishlist re-renders). Clicks need no rebinding — they
+    // are delegated at document level above.
     const observer = new MutationObserver(function () {
-        attachCartEvents();
-        attachWishlistEvents();
         updateWishlistIcons();
         attachImageFallbacks();
     });
@@ -522,6 +617,11 @@ if (dropdownHeader && submenu) {
 document.querySelectorAll(".mobile-parent-head").forEach(function (item) {
 
     item.addEventListener("click", function (e) {
+
+        // The category name is a link to its category page — let it navigate
+        // instead of toggling the submenu. The +/- icon (and the rest of the
+        // row) still expands/collapses.
+        if (e.target.closest("a")) return;
 
         e.stopPropagation();
 

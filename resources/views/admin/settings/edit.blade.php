@@ -4,15 +4,14 @@
 <div class="container-fluid p-0">
     <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
-            <h2 class="fw-700 text-dark mb-1">Edit Setting</h2>
-            <p class="text-muted mb-0">Website Settings Management</p>
-        </div>
-        <div>
-            <a href="{{ route('admin.settings.index') }}" class="btn btn-outline-secondary rounded-pill px-4 fw-600">
-                <i class="fa-solid fa-arrow-left me-2"></i> {{ config('button.back') }}
-            </a>
+            <h2 class="fw-700 text-dark mb-1">Website Settings</h2>
+            <p class="text-muted mb-0">Store identity, charges, and storefront preferences</p>
         </div>
     </div>
+
+    @if (session('success'))
+        <div class="alert alert-success border-0 rounded-3 mb-4">{{ session('success') }}</div>
+    @endif
 
     @if ($errors->any())
         <div class="alert alert-danger border-0 rounded-3 mb-4">
@@ -111,7 +110,12 @@
                         <label class="form-label fw-600 text-dark">Logo</label>
                         <input type="file" accept="image/*"
                                name="logo"
-                               class="form-control rounded-3">
+                               class="form-control rounded-3"
+                               data-dropzone
+                               data-preview="#logo-preview">
+                        <small data-dropzone-hint style="display:none;"></small>
+                        <img id="logo-preview" alt="New logo preview"
+                             class="img-thumbnail mt-2" style="display:none; max-width:100px;">
 
                         @if($setting->logo)
                             <div class="mt-2">
@@ -126,7 +130,13 @@
                         <label class="form-label fw-600 text-dark">Favicon</label>
                         <input type="file"
                                name="favicon"
-                               class="form-control rounded-3">
+                               class="form-control rounded-3"
+                               accept="image/*"
+                               data-dropzone
+                               data-preview="#favicon-preview">
+                        <small data-dropzone-hint style="display:none;"></small>
+                        <img id="favicon-preview" alt="New favicon preview"
+                             class="img-thumbnail mt-2" style="display:none; max-width:50px;">
 
                         @if($setting->favicon)
                             <div class="mt-2">
@@ -179,6 +189,8 @@
                                 <div class="text-muted small">Enable or disable Cash on Delivery payment option at checkout</div>
                             </div>
                             <input class="form-check-input ms-0 me-2 fs-4" type="checkbox" role="switch" id="is_cod_enabled" name="is_cod_enabled" value="1" {{ old('is_cod_enabled', $setting->is_cod_enabled ?? true) ? 'checked' : '' }}>
+                            {{-- Marker input: lets the server tell "form saved, checkbox unchecked" apart from "field not in this request" --}}
+                            <input type="hidden" name="is_cod_enabled_submitted" value="1">
                         </div>
                     </div>
 

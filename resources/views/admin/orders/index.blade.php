@@ -44,7 +44,8 @@
         font-size: 0.9rem;
         outline: none;
         transition: border-color 0.2s;
-        min-width: 240px;
+        width: 100%;
+        max-width: 240px;
     }
     .search-bar-wrapper .dataTables_filter input:focus { border-color: #0A9051; }
     .yajra-table-custom-class table { width: 100% !important; }
@@ -81,17 +82,24 @@
             <p class="mb-0 opacity-75">Track, fulfil and reconcile every customer order</p>
         </div>
         <div class="d-flex gap-2 flex-wrap order-status-filter">
+            {{-- Quick filters: client-facing labels; data-dt-search carries the RAW
+                 order_status value behind each label (server-side LIKE filtered).
+                 Returned/Refunded are returns-module states — categories of their
+                 own, deliberately NOT folded into Delivered. --}}
             <a href="javascript:void(0);" class="btn btn-light btn-sm rounded-pill px-3 fw-600" data-dt-search="">All</a>
-            <a href="javascript:void(0);" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-600" data-dt-search="pending">Pending</a>
+            <a href="javascript:void(0);" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-600" data-dt-search="pending">Placed</a>
             <a href="javascript:void(0);" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-600" data-dt-search="processing">Processing</a>
-            <a href="javascript:void(0);" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-600" data-dt-search="completed">Completed</a>
+            <a href="javascript:void(0);" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-600" data-dt-search="shipped">Shipped</a>
+            <a href="javascript:void(0);" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-600" data-dt-search="completed">Delivered</a>
             <a href="javascript:void(0);" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-600" data-dt-search="cancelled">Cancelled</a>
+            <a href="javascript:void(0);" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-600" data-dt-search="returned">Returned</a>
+            <a href="javascript:void(0);" class="btn btn-outline-light btn-sm rounded-pill px-3 fw-600" data-dt-search="refunded">Refunded</a>
         </div>
     </div>
 </div>
 
 <div class="dt-card">
-    <div class="dt-card-body">
+    <div class="dt-card-body table-responsive">
         {{ $dataTable->table(['class' => 'table table-hover align-middle']) }}
     </div>
 </div>
@@ -100,7 +108,9 @@
 @section('scripts')
 {{ $dataTable->scripts(attributes: ['type' => 'module']) }}
 <script>
-    // Status quick-filter pills: filter strictly on the Order Status column.
+    // Status quick-filter pills: server-side (Yajra) filters the RAW order_status
+    // column via LIKE, so pills carry the raw value behind each client-facing
+    // label. No regex flag — Yajra cannot translate regexes to SQL (matches nothing).
     document.querySelectorAll('.order-status-filter [data-dt-search]').forEach(function (pill) {
         pill.addEventListener('click', function () {
             document.querySelectorAll('.order-status-filter [data-dt-search]').forEach(function (p) {
@@ -111,8 +121,7 @@
             pill.classList.add('btn-light');
             if (!window.jQuery) return;
             const table = window.jQuery('#order-table').DataTable();
-            const term = pill.getAttribute('data-dt-search');
-            table.column(6).search(term ? '^' + term + '$' : '', true, false).draw();
+            table.column(6).search(pill.getAttribute('data-dt-search'), false, false).draw();
         });
     });
 </script>

@@ -36,7 +36,7 @@
     "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2"
   },
   "resources/css/app.css": {
-    "file": "assets/app-CHjJRmQA.css",
+    "file": "assets/app-DT_WWgd4.css",
     "name": "app",
     "names": [
       "app.css"
@@ -53,7 +53,7 @@
     "src": "resources/images/logo2.jpeg"
   },
   "resources/js/app.js": {
-    "file": "assets/app-gqIdEgRH.js",
+    "file": "assets/app-Ny_w1Hfl.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true

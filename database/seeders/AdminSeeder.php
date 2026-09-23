@@ -63,18 +63,5 @@ class AdminSeeder extends Seeder
             ->each(function (User $user) use ($userRole) {
                 $user->syncRoles([$userRole->name]);
             });
-
-        // ---- Demo customer (handy for local testing, harmless in prod) ----
-        $demoCustomer = User::updateOrCreate(
-            ['email' => 'user@shivayra.com'],
-            [
-                'name' => 'Shivayra Customer User',
-                'first_name' => 'Customer',
-                'last_name' => 'User',
-                'password' => Hash::make('password'),
-                'status' => 'active',
-            ]
-        );
-        $demoCustomer->syncRoles([$userRole->name]);
     }
 }

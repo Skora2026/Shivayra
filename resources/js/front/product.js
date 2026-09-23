@@ -13,7 +13,6 @@
         initFilters();
         initSorting();
         initMobileFilters();
-        initCartWishlist();
         initResetButtons();
         
         // Handle URL category and subcategory parameters on page load
@@ -354,45 +353,12 @@
         }
     }
     
-    // Toast helpers — reuse the header toasts if present, else a floating notice.
-    function notify(html) {
-        const t = document.getElementById("toast");
-        if (!t) return;
-        t.innerHTML = html;
-        t.classList.add("show");
-        setTimeout(() => t.classList.remove("show"), 1800);
-    }
-    function notifyWish(html) {
-        const t = document.getElementById("wishToast");
-        if (!t) return;
-        t.innerHTML = html;
-        t.classList.add("show");
-        setTimeout(() => t.classList.remove("show"), 1800);
-    }
-
+    // Toast helpers were removed: real cart/wishlist handling (and its toasts)
+    // lives in header.js via document-level delegation.
     // ========== 8. CART & WISHLIST ==========
-    function initCartWishlist() {
-        // Add to cart
-        document.querySelectorAll('.add-to-cart').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const name = this.dataset.name || 'Product';
-                const price = this.dataset.price || '0';
-                notify(`<svg class="icon"><use href="#i-check"/></svg> Added to cart: ${name} — ₹${price}`);
-            });
-        });
-        
-        // Add to wishlist
-        document.querySelectorAll('.add-to-wishlist').forEach(btn => {
-            btn.addEventListener('click', function(e) {
-                e.preventDefault();
-                e.stopPropagation();
-                const name = this.dataset.name || 'Product';
-                notifyWish(`<svg class="icon"><use href="#i-heart-fill"/></svg> Added to wishlist: ${name}`);
-            });
-        });
-    }
+    // Real cart/wishlist logic lives in header.js (document-level delegation).
+    // No local stubs here: they only showed a toast and their stopPropagation()
+    // suppressed the delegated handlers.
     
     // ========== 9. RESET BUTTONS ==========
     function initResetButtons() {

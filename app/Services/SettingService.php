@@ -39,7 +39,14 @@ class SettingService extends BaseService
             'min_order_for_free_delivery',
         ]);
 
-        $data['is_cod_enabled'] = $requestData->has('is_cod_enabled') ? (bool) $requestData->input('is_cod_enabled') : false;
+        // Checkbox semantics: the real settings form posts a marker input
+        // alongside the checkbox, so "marker present + checkbox absent" means
+        // the owner explicitly unchecked COD. Requests that omit the marker
+        // entirely (API calls, partial saves, the OTP verify-path writes)
+        // must NOT silently disable COD — preserve the stored value instead.
+        if ($requestData->has('is_cod_enabled_submitted')) {
+            $data['is_cod_enabled'] = $requestData->boolean('is_cod_enabled');
+        }
 
         return $data;
     }

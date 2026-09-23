@@ -382,12 +382,21 @@
 
                 </div>
 
-                <!-- Email field -->
+                <!-- Email field with OTP -->
                 <div class="input-group">
                     <i class="fas fa-envelope"></i>
                     <input type="email" name="email" class="input-field" id="regEmail" placeholder="Email address"
                         autocomplete="email" required value="{{ old('email') }}">
+                    <div id="emailOtpSection" style="display: none; margin-top: 0.5rem;">
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="emailOtpInput" class="input-field" placeholder="Enter 6-digit OTP" maxlength="6" style="padding-left: 1rem;">
+                            <button type="button" id="verifyEmailOtp" class="action-btn" style="width: auto; padding: 0.8rem 1.2rem; font-size: 0.85rem;">Verify</button>
+                        </div>
+                        <small id="emailOtpMsg" style="font-size: 0.75rem; margin-top: 4px; display: block;"></small>
+                    </div>
                 </div>
+
+
 
                 <!-- Password field with toggle -->
                 <div class="input-group">
@@ -435,3 +444,126 @@
         </div>
     </div>
 </div>
+
+<script>
+(function() {
+    let emailVerified = false;
+
+    // Send OTP function
+    window.sendOtp = async function(type, value) {
+        if (!value || (type === 'email' && !value.includes('@'))) {
+            showOtpMsg('Please enter a valid email', 'error');
+            return;
+        }
+
+        const section = document.getElementById('emailOtpSection');
+        section.style.display = 'block';
+        showOtpMsg('Sending OTP...', 'info');
+
+        try {
+            const res = await fetch('/otp/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || document.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ type: 'email', value })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showOtpMsg(data.message, 'success');
+                startResendTimer();
+            } else {
+                showOtpMsg(data.message, 'error');
+            }
+        } catch (e) {
+            showOtpMsg('Failed to send OTP. Please try again.', 'error');
+        }
+    };
+
+    // Verify OTP function
+    window.verifyOtp = async function(value) {
+        const input = document.getElementById('emailOtpInput');
+        const otp = input?.value?.trim();
+        if (!otp || otp.length !== 6) {
+            showOtpMsg('Please enter a 6-digit OTP', 'error');
+            return;
+        }
+
+        try {
+            const res = await fetch('/otp/verify', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || document.querySelector('input[name="_token"]').value,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ type: 'email', value, otp })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showOtpMsg('✓ ' + data.message, 'success');
+                emailVerified = true;
+                input.disabled = true;
+                document.getElementById('verifyEmailOtp').disabled = true;
+            } else {
+                showOtpMsg(data.message, 'error');
+            }
+        } catch (e) {
+            showOtpMsg('Verification failed. Please try again.', 'error');
+        }
+    };
+
+    function showOtpMsg(msg, status) {
+        const el = document.getElementById('emailOtpMsg');
+        if (!el) return;
+        el.textContent = msg;
+        el.style.color = status === 'success' ? '#0f5132' : status === 'error' ? '#842029' : '#666';
+        el.style.background = status === 'success' ? '#d1e7dd' : status === 'error' ? '#f8d7da' : 'transparent';
+        el.style.padding = '4px 8px';
+        el.style.borderRadius = '8px';
+    }
+
+    function startResendTimer() {
+        let seconds = 60;
+        const btn = document.getElementById('sendEmailOtp');
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = seconds + 's';
+            const interval = setInterval(() => {
+                seconds--;
+                btn.textContent = seconds + 's';
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    btn.disabled = false;
+                    btn.textContent = 'Send OTP';
+                }
+            }, 1000);
+        }
+    }
+
+    // Auto-send OTP when email field loses focus
+    const emailInput = document.getElementById('regEmail');
+    let emailBlurTimeout;
+    emailInput?.addEventListener('blur', function() {
+        clearTimeout(emailBlurTimeout);
+        emailBlurTimeout = setTimeout(() => sendOtp('email', this.value), 500);
+    });
+
+    // Verify button click
+    document.getElementById('verifyEmailOtp')?.addEventListener('click', () => {
+        verifyOtp(document.getElementById('regEmail').value);
+    });
+
+    // Prevent form submit if email not verified
+    document.querySelector('form')?.addEventListener('submit', function(e) {
+        if (!emailVerified) {
+            e.preventDefault();
+            showOtpMsg('Please verify your email first', 'error');
+            document.getElementById('emailOtpSection').style.display = 'block';
+            return false;
+        }
+    });
+})();
+</script>

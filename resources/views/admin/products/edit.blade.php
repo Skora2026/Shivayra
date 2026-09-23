@@ -16,8 +16,18 @@
     .image-upload-zone { border: 2px dashed #d1d5db; border-radius: 1rem; padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s; position: relative; background: #fafafa; }
     .image-upload-zone:hover { border-color: #2d6aad; background: #f0f7ff; }
     .image-upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+    /* Drag-over / rejected states live in the shared dropzone partial
+       (admin.partials.dropzone-script), so every upload field shares them. */
     .image-preview-wrap { width: 120px; height: 120px; border-radius: 1rem; overflow: hidden; border: 3px solid #e9ecef; margin: 0 auto 1rem; background: #f3f4f6; display: flex; align-items: center; justify-content: center; }
     .image-preview-wrap img { width: 100%; height: 100%; object-fit: cover; }
+    /* Additional-images gallery: thumbnails for saved files and new picks */
+    .gallery-grid { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem; }
+    .gallery-grid:empty { display: none; }
+    .gallery-thumb { position: relative; width: 92px; height: 92px; border-radius: 0.75rem; overflow: hidden; border: 2px solid #e9ecef; background: #f3f4f6; }
+    .gallery-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .gallery-remove { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; padding: 0; border: none; border-radius: 50%; background: rgba(220, 53, 69, 0.92); color: #fff; font-size: 0.95rem; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s, transform 0.2s; }
+    .gallery-remove:hover { background: #b02a37; transform: scale(1.08); }
+    .gallery-new-badge { position: absolute; left: 0; right: 0; bottom: 0; padding: 2px 0; background: rgba(45, 106, 173, 0.9); color: #fff; font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; text-align: center; }
     .btn-save { background: linear-gradient(100deg, #1e3a5f 0%, #2d6aad 100%); color: #fff; border: none; border-radius: 2rem; padding: 0.6rem 2rem; font-weight: 600; transition: all 0.2s; box-shadow: 0 4px 12px rgba(30,58,95,0.2); }
     .btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(30,58,95,0.3); color:#fff; }
     .current-image-badge { background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 0.75rem; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
@@ -254,6 +264,13 @@
                         <small class="form-text text-muted d-block">Show this product in the "Featured Products" section on the homepage.</small>
                     </div>
                 </div>
+                <div class="col-md-4">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="prod-returnable" name="is_returnable" value="1" {{ old('is_returnable', $product->is_returnable ?? true) ? 'checked' : '' }}>
+                        <label class="form-check-label fw-600" for="prod-returnable">Returnable</label>
+                        <small class="form-text text-muted d-block">Customers can file a return within the return window (Settings).</small>
+                    </div>
+                </div>
             </div>
 
             <hr class="section-divider">
@@ -288,82 +305,85 @@
                     </button>
                 </div>
                 
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle border" id="variants-table">
-                        <thead>
-                            <tr class="bg-light">
-                                <th style="width: 180px;">
-                                    <div class="d-flex align-items-center gap-1">
-                                        <input type="text" name="variant_name_1" class="form-control form-control-sm fw-700 text-dark bg-transparent border-0 border-bottom border-secondary-subtle" value="{{ old('variant_name_1', $product->variant_name_1 ?? 'Size') }}" placeholder="Variant 1 Name">
-                                        <i class="fa-solid fa-pen-to-square text-muted" style="font-size: 0.8rem;"></i>
-                                    </div>
-                                    <select class="form-select form-select-sm mt-1 border-0 text-muted" style="font-size:0.75rem;" disabled>
-                                        <option>Text Type</option>
-                                    </select>
-                                </th>
-                                <th style="width: 180px;">
-                                    <div class="d-flex align-items-center gap-1">
-                                        <input type="text" name="variant_name_2" class="form-control form-control-sm fw-700 text-dark bg-transparent border-0 border-bottom border-secondary-subtle" value="{{ old('variant_name_2', $product->variant_name_2 ?? 'Color') }}" placeholder="Variant 2 Name">
-                                        <i class="fa-solid fa-pen-to-square text-muted" style="font-size: 0.8rem;"></i>
-                                    </div>
-                                    <select class="form-select form-select-sm mt-1 border-0 text-muted" style="font-size:0.75rem;" disabled>
-                                        <option>Color Type</option>
-                                    </select>
-                                </th>
-                                <th>Regular Price *</th>
-                                <th>Sale Price (optional)</th>
-                                <th style="width: 110px;">Stock *</th>
-                                <th style="width: 250px;">Variant Image</th>
-                                <th style="width: 50px;"></th>
-                            </tr>
-                        </thead>
-                        <tbody id="variants-container">
+                {{-- Attribute labels - shared by every variant card below --}}
+                <div class="variant-labels-strip mb-3">
+                    <div class="vfield">
+                        <label class="vlabel">Variant 1 Label</label>
+                        <input type="text" name="variant_name_1" class="form-control form-control-sm" value="{{ old('variant_name_1', $product->variant_name_1 ?? 'Size') }}" placeholder="e.g. Size">
+                    </div>
+                    <div class="vfield">
+                        <label class="vlabel">Variant 2 Label</label>
+                        <input type="text" name="variant_name_2" class="form-control form-control-sm" value="{{ old('variant_name_2', $product->variant_name_2 ?? 'Color') }}" placeholder="e.g. Color">
+                    </div>
+                    <div class="vfield d-flex align-items-end">
+                        <p class="mb-0 text-muted" style="font-size:.75rem;">Labels name the attribute fields on every variant card (e.g. Size, Color).</p>
+                    </div>
+                </div>
+
+                <tbody id="variants-container" class="d-block">
                             @foreach($product->variants as $index => $variant)
-                                <tr class="variant-row">
+                                <div class="variant-card">
+                                    <div class="variant-card__head">
+                                        <span class="variant-card__num">#{{ $index + 1 }}</span>
+                                        <span class="variant-card__title">{{ $variant->name ?: 'Variant' }}</span>
+                                        <button type="button" class="btn btn-outline-danger btn-sm border-0 remove-variant-row ms-auto"><i class="fa-solid fa-trash"></i></button>
+                                    </div>
                                     <input type="hidden" name="variants[{{ $index }}][id]" value="{{ $variant->id }}">
                                     <input type="hidden" name="variants[{{ $index }}][old_image]" value="{{ $variant->image }}">
-                                    <td>
-                                        <input type="text" name="variants[{{ $index }}][value_1]" class="form-control form-control-sm" placeholder="e.g. S, M, L or 4g" value="{{ $variant->value_1 }}">
-                                    </td>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <input type="color" class="form-control-color border-0 p-0" style="width: 30px; height: 30px; cursor: pointer; border-radius: 50%;" value="{{ str_starts_with($variant->value_2, '#') ? $variant->value_2 : '#000000' }}" onchange="document.getElementById('hex_val_{{ $index }}').value = this.value">
-                                            <input type="text" id="hex_val_{{ $index }}" name="variants[{{ $index }}][value_2]" class="form-control form-control-sm" placeholder="#c63939" value="{{ $variant->value_2 }}">
+                                    <div class="variant-card__row variant-card__row--identity">
+                                        <div class="vfield">
+                                            <label class="vlabel">Variant Name</label>
+                                            <input type="text" name="variants[{{ $index }}][name]" class="form-control form-control-sm" placeholder="e.g. 18K Rose Gold" value="{{ $variant->name }}">
                                         </div>
-                                    </td>
-                                    <td>
-                                        <div class="price-input-group">
-                                            <span class="currency-symbol">₹</span>
-                                            <input type="number" step="0.01" name="variants[{{ $index }}][price]" class="form-control form-control-sm" placeholder="2500.00" value="{{ $variant->price }}" required style="padding-left:1.5rem;">
+                                        <div class="vfield">
+                                            <label class="vlabel vlabel--dynamic" data-label-for="1">{{ $product->variant_name_1 ?? 'Size' }}</label>
+                                            <input type="text" name="variants[{{ $index }}][value_1]" class="form-control form-control-sm" placeholder="e.g. S, M, L or 4g" value="{{ $variant->value_1 }}">
                                         </div>
-                                    </td>
-                                    <td>
-                                        <div class="price-input-group">
-                                            <span class="currency-symbol">₹</span>
-                                            <input type="number" step="0.01" name="variants[{{ $index }}][sale_price]" class="form-control form-control-sm" placeholder="1899.00" value="{{ $variant->sale_price }}" style="padding-left:1.5rem;">
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <input type="number" name="variants[{{ $index }}][stock]" class="form-control form-control-sm" placeholder="23" value="{{ $variant->stock }}" required>
-                                    </td>
-                                    <td>
-                                        <div class="d-flex flex-column gap-2">
-                                            <div class="d-flex flex-wrap gap-1">
-                                                @foreach($variant->images as $imgIndex => $img)
-                                                    <div class="position-relative var-img-card" style="width: 40px; height: 40px;">
-                                                        <img src="{{ filter_var($img, FILTER_VALIDATE_URL) ? $img : asset('storage/' . $img) }}" alt="var" class="rounded border" style="width: 40px; height: 40px; object-fit: cover;">
-                                                        <input type="hidden" name="variants[{{ $index }}][existing_images][]" value="{{ $img }}">
-                                                        <button type="button" class="btn btn-danger btn-xs position-absolute top-0 end-0 rounded-circle remove-var-img-btn" style="padding: 0px 4px; font-size: 0.65rem; border: none; transform: translate(30%, -30%);">&times;</button>
-                                                    </div>
-                                                @endforeach
+                                        <div class="vfield">
+                                            <label class="vlabel vlabel--dynamic" data-label-for="2">{{ $product->variant_name_2 ?? 'Color' }}</label>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <input type="color" class="form-control-color border-0 p-0" style="width: 30px; height: 30px; cursor: pointer; border-radius: 50%;" value="{{ str_starts_with($variant->value_2, '#') ? $variant->value_2 : '#000000' }}" onchange="document.getElementById('hex_val_{{ $index }}').value = this.value">
+                                                <input type="text" id="hex_val_{{ $index }}" name="variants[{{ $index }}][value_2]" class="form-control form-control-sm" placeholder="#c63939" value="{{ $variant->value_2 }}">
                                             </div>
-                                            <input type="file" name="variants[{{ $index }}][images][]" class="form-control form-control-sm" accept="image/*" multiple>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-outline-danger btn-sm border-0 remove-variant-row"><i class="fa-solid fa-trash"></i></button>
-                                    </td>
-                                </tr>
+                                    </div>
+                                    <div class="variant-card__row variant-card__row--pricing">
+                                        <div class="vfield">
+                                            <label class="vlabel">Regular Price *</label>
+                                            <div class="price-input-group">
+                                                <span class="currency-symbol">&#8377;</span>
+                                                <input type="number" step="0.01" name="variants[{{ $index }}][price]" class="form-control form-control-sm" placeholder="2500.00" value="{{ $variant->price }}" required style="padding-left:1.5rem;">
+                                            </div>
+                                        </div>
+                                        <div class="vfield">
+                                            <label class="vlabel">Sale Price (optional)</label>
+                                            <div class="price-input-group">
+                                                <span class="currency-symbol">&#8377;</span>
+                                                <input type="number" step="0.01" name="variants[{{ $index }}][sale_price]" class="form-control form-control-sm" placeholder="1899.00" value="{{ $variant->sale_price }}" style="padding-left:1.5rem;">
+                                            </div>
+                                        </div>
+                                        <div class="vfield vfield--tight">
+                                            <label class="vlabel">Stock *</label>
+                                            <input type="number" name="variants[{{ $index }}][stock]" class="form-control form-control-sm" placeholder="23" value="{{ $variant->stock }}" required>
+                                        </div>
+                                        <div class="vfield vfield--wide">
+                                            <label class="vlabel">Variant Image</label>
+                                            <div class="d-flex flex-column gap-2">
+                                                <div class="d-flex flex-wrap gap-1">
+                                                @foreach($variant->images as $imgIndex => $img)
+                                                        <div class="position-relative var-img-card" style="width: 40px; height: 40px;">
+                                                            <img src="{{ filter_var($img, FILTER_VALIDATE_URL) ? $img : asset('storage/' . $img) }}" alt="var" class="rounded border" style="width: 40px; height: 40px; object-fit: cover;">
+                                                            <input type="hidden" name="variants[{{ $index }}][existing_images][]" value="{{ $img }}">
+                                                            <button type="button" class="btn btn-danger btn-xs position-absolute top-0 end-0 rounded-circle remove-var-img-btn" style="padding: 0px 4px; font-size: 0.65rem; border: none; transform: translate(30%, -30%);">&times;</button>
+                                                        </div>
+                                                @endforeach
+                                                </div>
+                                                <input type="file" name="variants[{{ $index }}][images][]" class="form-control form-control-sm" accept="image/*" multiple data-dropzone>
+                                                <small class="d-block mt-1" style="font-size:0.72rem;color:#2d6aad;display:none;" data-dropzone-hint></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             @endforeach
                         </tbody>
                     </table>
@@ -386,7 +406,7 @@
             <div class="image-upload-zone mb-3">
                 <input type="file" name="image" id="prod-image" accept="image/*" onchange="previewImage(this)">
                 <div class="image-preview-wrap" id="preview-wrap" style="display:none;">
-                    <img id="img-preview" src="" alt="Preview">
+                    <img id="img-preview" alt="Preview">
                 </div>
                 <i class="fa-solid fa-cloud-arrow-up fa-2x text-muted mb-2" id="upload-icon"></i>
                 <p class="mb-1 fw-500 text-secondary">Click or drag new product image here</p>
@@ -394,29 +414,44 @@
             </div>
             @error('image')<div class="text-danger mt-1 mb-3" style="font-size:0.82rem;">{{ $message }}</div>@enderror
 
-            {{-- <hr class="section-divider">
-            <p class="section-title"><i class="fa-solid fa-images me-1"></i> Product Gallery Images (Multiple)</p>
+            <hr class="section-divider">
+            <p class="section-title"><i class="fa-solid fa-images me-1"></i> Additional Images (Gallery)</p>
 
             @php $gallery = $product->gallery_images ?? []; @endphp
-            @if(count($gallery) > 0)
-            <div class="row g-3 mb-3">
+
+            {{-- Saved images. Each hidden input keeps one file on save; removing a
+                 card drops its input, which deletes that file. --}}
+            <div class="gallery-grid" id="gallery-existing">
                 @foreach($gallery as $img)
-                    <div class="col-6 col-md-2 position-relative gallery-preview-card" style="min-height: 100px;">
-                        <img src="{{ asset('storage/' . $img) }}" alt="gallery" class="img-fluid rounded border" style="height: 100px; width: 100%; object-fit: cover;">
+                    <div class="gallery-thumb">
+                        <img src="{{ asset('storage/' . $img) }}" alt="Gallery image">
                         <input type="hidden" name="existing_gallery[]" value="{{ $img }}">
-                        <button type="button" class="btn btn-danger btn-xs position-absolute top-0 end-0 m-1 rounded-circle remove-gallery-btn" style="padding: 2px 6px; font-size: 0.75rem; border: none;">&times;</button>
+                        <button type="button" class="gallery-remove" title="Remove this image">&times;</button>
                     </div>
                 @endforeach
             </div>
-            @endif --}}
+
+            <p class="text-muted mb-3" id="gallery-empty" style="font-size:0.82rem; {{ count($gallery) ? 'display:none;' : '' }}">
+                No additional images yet.
+            </p>
 
             <div class="image-upload-zone mb-3" style="border: 2px dashed rgba(10, 144, 81, 0.25);">
-                <input type="file" name="gallery[]" id="prod-gallery" accept="image/*" multiple>
-                <i class="fa-solid fa-images fa-2x text-muted mb-2"></i>
+                <input type="file" name="gallery[]" id="prod-gallery" accept="image/*" multiple
+                    onchange="addGalleryFiles(this)">
+                <i class="fa-solid fa-images fa-2x text-muted mb-2" id="gallery-icon"></i>
                 <p class="mb-1 fw-500 text-secondary">Click or drag additional gallery images here</p>
-                <p class="text-muted" style="font-size:0.8rem;">Select multiple files at once — JPG, PNG, WEBP</p>
+                <p class="text-muted" style="font-size:0.8rem;">Pick as many as you like — you can come back and add more. JPG, PNG, WEBP, max 3MB each.</p>
+                <small data-dropzone-hint style="display:none;"></small>
             </div>
+
+            {{-- Marks this form as gallery-aware, so clearing every image reads as
+                 "removed" rather than "gallery not managed here". --}}
+            <input type="hidden" name="gallery_form" value="1">
+
+            <div class="gallery-grid" id="gallery-preview"></div>
+
             @error('gallery')<div class="text-danger mt-1" style="font-size:0.82rem;">{{ $message }}</div>@enderror
+            @error('gallery.*')<div class="text-danger mt-1" style="font-size:0.82rem;">{{ $message }}</div>@enderror
 
             <div class="d-flex align-items-center gap-3 mt-4 pt-3 border-top">
                 <button type="submit" class="btn btn-save px-4">
@@ -426,7 +461,6 @@
             </div>
         </form>
     </div>
-</div>
 @endsection
 
 @section('scripts')
@@ -444,6 +478,81 @@
             };
             reader.readAsDataURL(input.files[0]);
         }
+    }
+
+    // ---------- Additional gallery images ----------
+    // Picks live in a plain array so individual files can be dropped before
+    // submit; the input's own FileList is rebuilt from it on every change.
+    let pendingGalleryFiles = [];
+
+    function addGalleryFiles(input) {
+        pendingGalleryFiles = pendingGalleryFiles.concat(Array.from(input.files || []));
+        syncGalleryInput(input);
+        renderGalleryPreview();
+    }
+
+    function syncGalleryInput(input) {
+        const dt = new DataTransfer();
+        pendingGalleryFiles.forEach(file => dt.items.add(file));
+        input.files = dt.files;
+    }
+
+    function renderGalleryPreview() {
+        const wrap = document.getElementById('gallery-preview');
+        const icon = document.getElementById('gallery-icon');
+        if (!wrap) return;
+
+        wrap.innerHTML = '';
+        if (icon) icon.style.display = pendingGalleryFiles.length ? 'none' : '';
+
+        pendingGalleryFiles.forEach((file, index) => {
+            const card = document.createElement('div');
+            card.className = 'gallery-thumb';
+
+            const img = document.createElement('img');
+            img.alt = file.name;
+            const reader = new FileReader();
+            reader.onload = e => { img.src = e.target.result; };
+            reader.readAsDataURL(file);
+
+            const badge = document.createElement('span');
+            badge.className = 'gallery-new-badge';
+            badge.textContent = 'New';
+
+            const remove = document.createElement('button');
+            remove.type = 'button';
+            remove.className = 'gallery-remove';
+            remove.title = 'Remove from this upload';
+            remove.innerHTML = '&times;';
+            remove.addEventListener('click', function () {
+                pendingGalleryFiles.splice(index, 1);
+                const galleryInput = document.getElementById('prod-gallery');
+                syncGalleryInput(galleryInput);
+                renderGalleryPreview();
+                // Removing a pick edits input.files without raising a change
+                // event, so ask the shared upload component to recount.
+                if (window.refreshUploadFeedback) window.refreshUploadFeedback(galleryInput);
+            });
+
+            card.append(img, badge, remove);
+            wrap.appendChild(card);
+        });
+    }
+
+    // Dropping a saved image drops its hidden input, so the controller deletes
+    // that file on save.
+    const galleryExisting = document.getElementById('gallery-existing');
+    if (galleryExisting) {
+        galleryExisting.addEventListener('click', function (e) {
+            const btn = e.target.closest('.gallery-remove');
+            if (!btn) return;
+
+            btn.closest('.gallery-thumb').remove();
+
+            const empty = document.getElementById('gallery-empty');
+            const left = galleryExisting.querySelectorAll('.gallery-thumb').length;
+            if (empty) empty.style.display = left ? 'none' : '';
+        });
     }
 
     // AJAX Cascading Sub-Category Dropdown
@@ -512,66 +621,87 @@
         });
     }
 
-    // Dynamic Variants add/remove
+    // Live label sync: variant label inputs update field labels on every card
+        document.querySelectorAll('input[name="variant_name_1"], input[name="variant_name_2"]').forEach(function(inp) {
+            inp.addEventListener('input', function() {
+                var slot = inp.name === 'variant_name_1' ? '1' : '2';
+                var fallback = slot === '1' ? 'Size' : 'Color';
+                var text = inp.value.trim() || fallback;
+                document.querySelectorAll('.vlabel--dynamic[data-label-for="' + slot + '"]').forEach(function(l) {
+                    l.textContent = text;
+                });
+            });
+        });
+
+        // Dynamic Variants add/remove
     const variantsContainer = document.getElementById('variants-container');
     const addVariantBtn = document.getElementById('add-variant-btn');
     let variantIndex = {{ count($product->variants) }};
 
     if (addVariantBtn && variantsContainer) {
-        addVariantBtn.addEventListener('click', function() {
-            const tr = document.createElement('tr');
-            tr.className = 'variant-row';
-            tr.innerHTML = `
-                <td>
-                    <input type="text" name="variants[\${variantIndex}][value_1]" class="form-control form-control-sm" placeholder="e.g. S, M, L or 4g">
-                </td>
-                <td>
-                    <div class="d-flex align-items-center gap-2">
-                        <input type="color" class="form-control-color border-0 p-0" style="width: 30px; height: 30px; cursor: pointer; border-radius: 50%;" value="#000000" onchange="document.getElementById('hex_val_\${variantIndex}').value = this.value">
-                        <input type="text" id="hex_val_\${variantIndex}" name="variants[\${variantIndex}][value_2]" class="form-control form-control-sm" placeholder="#c63939" value="#000000">
+            addVariantBtn.addEventListener('click', function() {
+                const card = document.createElement('div');
+                card.className = 'variant-card';
+                card.innerHTML = `
+                <div class="variant-card__head">
+                    <span class="variant-card__num">#${variantIndex + 1}</span>
+                    <span class="variant-card__title">New Variant</span>
+                    <button type="button" class="btn btn-outline-danger btn-sm border-0 remove-variant-row ms-auto"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <div class="variant-card__row variant-card__row--identity">
+                    <div class="vfield">
+                        <label class="vlabel">Variant Name</label>
+                        <input type="text" name="variants[${variantIndex}][name]" class="form-control form-control-sm" placeholder="e.g. 18K Rose Gold">
                     </div>
-                </td>
-                <td>
-                    <div class="price-input-group">
-                        <span class="currency-symbol">₹</span>
-                        <input type="number" step="0.01" name="variants[\${variantIndex}][price]" class="form-control form-control-sm" placeholder="2500.00" required style="padding-left:1.5rem;">
+                    <div class="vfield">
+                        <label class="vlabel vlabel--dynamic" data-label-for="1">${document.querySelector('input[name="variant_name_1"]')?.value.trim() || 'Size'}</label>
+                        <input type="text" name="variants[${variantIndex}][value_1]" class="form-control form-control-sm" placeholder="e.g. S, M, L or 4g">
                     </div>
-                </td>
-                <td>
-                    <div class="price-input-group">
-                        <span class="currency-symbol">₹</span>
-                        <input type="number" step="0.01" name="variants[\${variantIndex}][sale_price]" class="form-control form-control-sm" placeholder="1899.00" style="padding-left:1.5rem;">
+                    <div class="vfield">
+                        <label class="vlabel vlabel--dynamic" data-label-for="2">${document.querySelector('input[name="variant_name_2"]')?.value.trim() || 'Color'}</label>
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="color" class="form-control-color border-0 p-0" style="width: 30px; height: 30px; cursor: pointer; border-radius: 50%;" value="#000000" onchange="document.getElementById('hex_val_${variantIndex}').value = this.value">
+                            <input type="text" id="hex_val_${variantIndex}" name="variants[${variantIndex}][value_2]" class="form-control form-control-sm" placeholder="#c63939" value="#000000">
+                        </div>
                     </div>
-                </td>
-                <td>
-                    <input type="number" name="variants[\${variantIndex}][stock]" class="form-control form-control-sm" placeholder="23" required>
-                </td>
-                <td>
-                    <input type="file" name="variants[\${variantIndex}][images][]" class="form-control form-control-sm" accept="image/*" multiple>
-                </td>
-                <td>
-                    <button type="button" class="btn btn-outline-danger btn-sm border-0 remove-variant-row"><i class="fa-solid fa-trash"></i></button>
-                </td>
+                </div>
+                <div class="variant-card__row variant-card__row--pricing">
+                    <div class="vfield">
+                        <label class="vlabel">Regular Price *</label>
+                        <div class="price-input-group">
+                            <span class="currency-symbol">&#8377;</span>
+                            <input type="number" step="0.01" name="variants[${variantIndex}][price]" class="form-control form-control-sm" placeholder="2500.00" required style="padding-left:1.5rem;">
+                        </div>
+                    </div>
+                    <div class="vfield">
+                        <label class="vlabel">Sale Price (optional)</label>
+                        <div class="price-input-group">
+                            <span class="currency-symbol">&#8377;</span>
+                            <input type="number" step="0.01" name="variants[${variantIndex}][sale_price]" class="form-control form-control-sm" placeholder="1899.00" style="padding-left:1.5rem;">
+                        </div>
+                    </div>
+                    <div class="vfield vfield--tight">
+                        <label class="vlabel">Stock *</label>
+                        <input type="number" name="variants[${variantIndex}][stock]" class="form-control form-control-sm" placeholder="23" required>
+                    </div>
+                    <div class="vfield vfield--wide">
+                        <label class="vlabel">Variant Image</label>
+                        <input type="file" name="variants[${variantIndex}][images][]" class="form-control form-control-sm" accept="image/*" multiple data-dropzone>
+                        <small class="d-block mt-1" style="font-size:0.72rem;color:#2d6aad;display:none;" data-dropzone-hint></small>
+                    </div>
+                </div>
             `;
-            variantsContainer.appendChild(tr);
-            variantIndex++;
-        });
+                variantsContainer.appendChild(card);
+                variantIndex++;
+            });
 
-        variantsContainer.addEventListener('click', function(e) {
-            if (e.target.closest('.remove-variant-row')) {
-                e.target.closest('.variant-row').remove();
-            }
-            if (e.target.closest('.remove-var-img-btn')) {
-                e.target.closest('.var-img-card').remove();
-            }
-        });
-    }
-
-    // Dynamic Gallery removal
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.remove-gallery-btn')) {
-            e.target.closest('.gallery-preview-card').remove();
+            variantsContainer.addEventListener('click', function(e) {
+                if (e.target.closest('.remove-variant-row')) {
+                    e.target.closest('.variant-card').remove();
+                }
+            });
         }
-    });
 </script>
+
+{{-- Drag & drop is wired once in admin/layouts/app.blade.php --}}
 @endsection

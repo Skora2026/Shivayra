@@ -24,6 +24,9 @@ class Setting extends Model
         'delivery_fee',
         'min_order_for_free_delivery',
         'is_cod_enabled',
+        'return_window_days',
+        'featured_limit',
+        'trending_limit',
     ];
 
     protected $casts = [
@@ -31,5 +34,8 @@ class Setting extends Model
         'delivery_fee' => 'float',
         'min_order_for_free_delivery' => 'float',
         'is_cod_enabled' => 'boolean',
+        'return_window_days' => 'integer',
+        'featured_limit' => 'integer',
+        'trending_limit' => 'integer',
     ];
 }

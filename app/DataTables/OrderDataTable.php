@@ -42,15 +42,17 @@ class OrderDataTable extends DataTable
             })
             ->editColumn('order_status', function ($row) {
                 $status = strtolower($row->order_status);
-                if ($status === 'completed') {
-                    return '<span class="badge bg-success">Completed</span>';
-                } elseif ($status === 'processing') {
-                    return '<span class="badge bg-info text-white">Processing</span>';
-                } elseif ($status === 'cancelled') {
-                    return '<span class="badge bg-danger">Cancelled</span>';
-                }
 
-                return '<span class="badge bg-warning text-dark">Pending</span>';
+                // Labels mirror the customer's shipment timeline exactly.
+                return match ($status) {
+                    'processing' => '<span class="badge bg-info text-white">Processing</span>',
+                    'shipped' => '<span class="badge bg-primary">Shipped</span>',
+                    'completed', 'delivered' => '<span class="badge bg-success">Delivered</span>',
+                    'cancelled' => '<span class="badge bg-danger">Cancelled</span>',
+                    'returned' => '<span class="badge bg-secondary">Returned</span>',
+                    'refunded' => '<span class="badge bg-success">Refunded</span>',
+                    default => '<span class="badge bg-warning text-dark">Placed</span>',
+                };
             })
             ->addColumn('action', function ($row) {
                 return '<div class="d-flex gap-1 justify-content-center">'

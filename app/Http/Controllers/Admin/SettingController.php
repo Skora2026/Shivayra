@@ -2,9 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\DataTables\SettingDataTable;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Setting\CreateRequest;
 use App\Http\Requests\Setting\UpdateRequest;
 use App\Models\Setting;
 use App\Services\SettingService;
@@ -22,58 +20,28 @@ class SettingController extends Controller
     }
 
     /**
-     * Display a listing of the resource.
+     * There is exactly one settings row for the store, so the index IS the
+     * settings form — no listing, no create/delete ceremony. The row is
+     * created on first visit so the form always has an ID to post to.
      */
-    public function index(SettingDataTable $dataTable)
+    public function index()
     {
-        $hasSettings = $this->settingService->exists([]);
-
-        return $dataTable->render('admin.settings.index', compact('hasSettings'));
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        return view('admin.settings.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(CreateRequest $request)
-    {
-        $settingData = $this->settingService->getDataFromRequest($request);
-        $settingData['logo'] = $this->settingService->handleImageUpload($request, 'logo');
-        $settingData['favicon'] = $this->settingService->handleImageUpload($request, 'favicon');
-
-        $this->settingService->addData($settingData);
-
-        return redirect()->route('admin.settings.index')->with('success', 'Settings created successfully.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Setting $setting)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Setting $setting)
-    {
-        $setting = Setting::first();
+        $setting = Setting::first() ?? Setting::create([]);
 
         return view('admin.settings.edit', compact('setting'));
-
     }
 
     /**
-     * Update the specified resource in storage.
+     * Alias so admin.settings.edit (and any stale bookmarks to it) land on the
+     * same single settings form.
+     */
+    public function edit($id)
+    {
+        return $this->index();
+    }
+
+    /**
+     * Update the settings row.
      */
     public function update(UpdateRequest $request, $id)
     {
@@ -95,24 +63,16 @@ class SettingController extends Controller
 
         $this->settingService->updateData($id, $data);
 
-        return redirect()->route('admin.settings.index')
-            ->with('success', 'Setting updated successfully.');
-    }
+        $message = 'Setting updated successfully.';
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Setting $setting)
-    {
-        foreach (['logo', 'favicon'] as $file) {
-            if ($setting->{$file} && \Storage::disk('public')->exists($setting->{$file})) {
-                \Storage::disk('public')->delete($setting->{$file});
-            }
+        // Save-then-look: the row is the source of truth, so the warning
+        // reflects the persisted state regardless of how the request omitted
+        // or set the checkbox.
+        if (! $setting->fresh()->is_cod_enabled) {
+            $message .= ' Note: Cash on Delivery is currently DISABLED — customers can only pay online.';
         }
 
-        $this->settingService->deleteData($setting->id);
-
         return redirect()->route('admin.settings.index')
-            ->with('success', 'Setting deleted successfully.');
+            ->with('success', $message);
     }
 }

@@ -40,6 +40,7 @@ class ProductService extends BaseService
         $data['is_new_arrival'] = $requestData->has('is_new_arrival');
         $data['is_trending'] = $requestData->has('is_trending');
         $data['is_featured'] = $requestData->has('is_featured');
+        $data['is_returnable'] = $requestData->has('is_returnable');
 
         // Parse key-value specifications
         $specs = [];
@@ -111,7 +112,14 @@ class ProductService extends BaseService
      */
     public function handleGalleryUploads(Request $request, array $existingImages = []): array
     {
-        $existing = $request->input('existing_gallery', []);
+        // The form marks itself as gallery-aware with a hidden flag. Without it we
+        // leave the stored images untouched: an absent field is indistinguishable
+        // from "every image was removed", and guessing "removed" deletes files.
+        if (! $request->boolean('gallery_form')) {
+            return $existingImages;
+        }
+
+        $existing = array_filter((array) $request->input('existing_gallery', []));
 
         // Delete removed files
         $removed = array_diff($existingImages, $existing);
@@ -185,6 +193,7 @@ class ProductService extends BaseService
             $variant = $product->variants()->updateOrCreate(
                 ['id' => $variantId],
                 [
+                    'name' => $varData['name'] ?? null,
                     'value_1' => $varData['value_1'] ?? null,
                     'value_2' => $varData['value_2'] ?? null,
                     'price' => $varData['price'] ?? 0,
@@ -208,5 +217,30 @@ class ProductService extends BaseService
                 $oldVar->delete();
             }
         }
+    }
+
+    /**
+     * Delete a product along with every image it owns.
+     *
+     * The variants table cascades at the database level, but that only removes
+     * rows — the uploaded files would survive as orphans, so collect them first.
+     */
+    public function deleteData(string $id)
+    {
+        $product = $this->model::with('variants')->find($id);
+
+        if ($product) {
+            $files = array_filter(array_merge(
+                [$product->image],
+                $product->gallery_images ?? [],
+                $product->variants->flatMap(fn ($variant) => $variant->images)->all()
+            ));
+
+            if ($files) {
+                Storage::disk('public')->delete(array_values($files));
+            }
+        }
+
+        return parent::deleteData($id);
     }
 }

@@ -31,9 +31,14 @@ class Order extends Model
         'payment_method',
         'payment_status',
         'order_status',
+        'completed_at',
         'razorpay_order_id',
         'razorpay_payment_id',
         'razorpay_signature',
+    ];
+
+    protected $casts = [
+        'completed_at' => 'datetime',
     ];
 
     /**

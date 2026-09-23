@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\ContactController;
 use App\Models\Banner;
@@ -23,6 +24,14 @@ Route::get('/register', [AuthController::class, 'registerView'])->middleware('gu
 Route::post('/register', [AuthController::class, 'register'])->middleware('throttle:10,1')->name('register.submit');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
+// Google OAuth
+Route::get('/auth/google/redirect', [\App\Http\Controllers\SocialiteController::class, 'redirect'])->name('google.redirect');
+Route::get('/auth/google/callback', [\App\Http\Controllers\SocialiteController::class, 'callback'])->name('google.callback');
+
+// OTP Verification
+Route::post('/otp/send', [\App\Http\Controllers\OtpController::class, 'send'])->name('otp.send');
+Route::post('/otp/verify', [\App\Http\Controllers\OtpController::class, 'verify'])->name('otp.verify');
+
 // Forgot & Reset Password via OTP
 Route::middleware('guest')->group(function () {
     Route::get('/forgot-password', [AuthController::class, 'forgotPasswordView'])->name('password.request');
@@ -32,6 +41,10 @@ Route::middleware('guest')->group(function () {
 });
 
 Route::get('/', function () {
+    $settingsRow = \App\Models\Setting::first();
+    $featuredLimit = $settingsRow?->featured_limit ?? 8;
+    $trendingLimit = $settingsRow?->trending_limit ?? 8;
+
     $categories = Category::where('status', 'active')
         ->get();
 
@@ -47,6 +60,8 @@ Route::get('/', function () {
                     $sq->where('status', 'active');
                 });
         })
+        ->orderBy('name')
+        ->limit($featuredLimit)
         ->get();
 
     $trendingProducts = Product::where('status', 'active')
@@ -60,6 +75,8 @@ Route::get('/', function () {
                     $sq->where('status', 'active');
                 });
         })
+        ->orderBy('name')
+        ->limit($trendingLimit)
         ->get();
 
     $allProducts = Product::where('status', 'active')
@@ -109,7 +126,9 @@ Route::get('/product-detail/{slug}', function ($slug) {
         ->limit(4)
         ->get();
 
-    return view('front.product-detail', compact('product', 'relatedProducts'));
+    $productReviews = $product->reviews()->where('is_approved', true)->with('user')->latest()->get();
+
+    return view('front.product-detail', compact('product', 'relatedProducts', 'productReviews'));
 })->name('product_detail');
 
 Route::get('/about', function () {
@@ -178,6 +197,16 @@ Route::get('/wishlist', function () {
     return view('front.wishlist');
 })->name('wishlist');
 
+// Server-side cart: logged-in customers only. The client mirrors its
+// localStorage mutations here so the cart follows the user across devices
+// and survives cache clears. Guests remain localStorage-only.
+Route::middleware(['auth'])->group(function () {
+    Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::post('/cart/sync', [CartController::class, 'sync'])->name('cart.sync');
+    Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+    Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+});
+
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout');
 Route::post('/checkout', [CheckoutController::class, 'placeOrder'])->name('checkout.store');
 Route::post('/checkout/verify', [CheckoutController::class, 'verifyPayment'])->name('checkout.verify');
@@ -190,7 +219,19 @@ Route::post('/webhooks/razorpay', [CheckoutController::class, 'webhook'])->name(
 Route::middleware('auth')->group(function () {
     Route::get('/my-account', [AccountController::class, 'index'])->name('my-account');
     Route::get('/order-detail/{order_number}', [AccountController::class, 'orderDetails'])->name('order.details');
+
+    // Standalone invoice sheet. Kept off the dashboard page so the invoice is
+    // only ever produced as a printable/downloadable document.
+    Route::get('/order-detail/{order_number}/invoice', [AccountController::class, 'invoice'])->name('order.invoice');
     Route::put('/profile/update', [AccountController::class, 'updateProfile'])->name('profile.update');
+
+    // Reviews — verified purchasers only (server enforces delivered order)
+    Route::get('/my-account/review/{orderItemId}', [AccountController::class, 'reviewForm'])->name('review.form');
+    Route::post('/my-account/review/{orderItemId}', [AccountController::class, 'storeReview'])->name('review.store');
+
+    // Returns — verified purchasers only (server enforces ownership + window)
+    Route::get('/my-account/return/{orderItemId}', [AccountController::class, 'returnForm'])->name('return.form');
+    Route::post('/my-account/return/{orderItemId}', [AccountController::class, 'storeReturn'])->name('return.store');
 });
 
 Route::get('contact', function () {
@@ -243,13 +284,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Banner Management
             Route::resource('banners', BannerController::class);
 
-            // Setting Management
-            Route::resource('settings', SettingController::class);
+            // Setting Management — a single settings row: the index IS the form.
+            // No create/show/delete ceremony for one immutable-per-store row.
+            Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+            Route::get('settings/{setting}/edit', [SettingController::class, 'edit'])->name('settings.edit');
+            Route::match(['put', 'patch'], 'settings/{setting}', [SettingController::class, 'update'])->name('settings.update');
 
             // Order Management
             Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
             Route::get('orders/{id}', [OrderController::class, 'show'])->name('orders.show');
             Route::post('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+
+            // Home Sections (featured / trending control)
+            Route::get('home-sections', [\App\Http\Controllers\Admin\HomeSectionController::class, 'edit'])->name('home-sections.edit');
+            Route::put('home-sections', [\App\Http\Controllers\Admin\HomeSectionController::class, 'update'])->name('home-sections.update');
+            Route::post('home-sections/toggle', [\App\Http\Controllers\Admin\HomeSectionController::class, 'toggleProduct'])->name('home-sections.toggle');
+
+            // Customer Reviews moderation
+            Route::get('reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('reviews.index');
+            Route::post('reviews/{review}/approval', [\App\Http\Controllers\Admin\ReviewController::class, 'updateApproval'])->name('reviews.approval');
+            Route::delete('reviews/{review}', [\App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('reviews.destroy');
+
+            // Return / Refund management
+            Route::get('returns', [\App\Http\Controllers\Admin\ReturnRequestController::class, 'index'])->name('returns.index');
+            Route::get('returns/{returnRequest}', [\App\Http\Controllers\Admin\ReturnRequestController::class, 'show'])->name('returns.show');
+            Route::post('returns/{returnRequest}/status', [\App\Http\Controllers\Admin\ReturnRequestController::class, 'updateStatus'])->name('returns.status');
+            Route::put('return-window', [\App\Http\Controllers\Admin\ReturnWindowController::class, 'update'])->name('return-window.update');
         });
     });
 });

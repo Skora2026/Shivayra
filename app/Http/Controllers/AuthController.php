@@ -69,12 +69,25 @@ class AuthController extends Controller
             'password' => 'required|min:8|confirmed',
         ]);
 
+        // The register page walks the user through an email OTP before submit,
+        // but the UI alone proves nothing — a crafted POST would otherwise
+        // create an active account on an unverified (possibly someone else's)
+        // email. Server-side proof: OtpController::verify leaves a marker when
+        // an OTP for this address is genuinely solved (valid 30 minutes).
+        if (! cache()->get("otp_verified:email:{$request->email}")) {
+            return back()
+                ->withInput($request->only('name', 'email'))
+                ->withErrors(['email' => 'Please verify your email with the OTP code before creating your account.']);
+        }
+
         $user = User::create([
             'name' => $request->name,
             'first_name' => $request->name,
             'email' => $request->email,
             'password' => $request->password,
             'status' => 'active',
+            'email_verified' => true,
+            'email_verified_at' => now(),
         ]);
 
         $user->assignRole('user');

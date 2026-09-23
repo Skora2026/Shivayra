@@ -35,7 +35,7 @@
             "currency": "INR",
             "name": "{{ $settings?->site_name ?? 'Shivayra' }}",
             "description": "Payment for Order {{ $order->order_number }}",
-            "image": "{{ $settings?->logo ? asset('storage/' . $settings->logo) : asset('images/logo2.jpeg') }}"
+            "image": "{{ $settings?->logo ? asset('storage/' . $settings->logo) : asset('images/logo2.jpeg') }}",
             "order_id": "{{ $razorpayOrderId }}",
             "handler": function (response){
                 document.getElementById('razorpay_payment_id').value = response.razorpay_payment_id;

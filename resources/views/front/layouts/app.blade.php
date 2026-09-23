@@ -24,12 +24,18 @@
     <meta name="twitter:card" content="summary_large_image">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+    {{-- Per-page styles. Must stay after the vendor sheets above so a page can
+         override them. Without this yield, every @section('styles') in the
+         front views was silently dropped. --}}
+    @yield('styles')
 </head>
 
-<body>
+<body data-auth="{{ auth()->check() ? 1 : 0 }}">
 
     @include('front.layouts.partials.icons')
 

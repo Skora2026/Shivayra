@@ -84,6 +84,31 @@
                 <span>{{ __('labels.banners') }}</span>
             </a>
         </li>
+        <li class="{{ Request::routeIs('admin.home-sections.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.home-sections.edit') }}">
+                <i class="fa-solid fa-house-flag"></i>
+                <span>Home Sections</span>
+            </a>
+        </li>
+        <li class="{{ Request::routeIs('admin.reviews.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.reviews.index') }}">
+                <i class="fa-solid fa-star"></i>
+                <span>Reviews</span>
+            </a>
+        </li>
+        <li class="{{ Request::routeIs('admin.returns.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.returns.index') }}">
+                <i class="fa-solid fa-rotate-left"></i>
+                <span>Returns</span>
+                @php
+                    // Awaiting owner action: pending = decide, approved = refund.
+                    $actionableReturns = \App\Models\ReturnRequest::whereIn('status', ['pending', 'approved'])->count();
+                @endphp
+                @if($actionableReturns > 0)
+                    <span class="badge rounded-pill ms-auto" style="background:#C9A96A;color:#40111F;font-size:.62rem;">{{ $actionableReturns }} to do</span>
+                @endif
+            </a>
+        </li>
         {{-- Settings --}}
         <li class="{{ Request::routeIs('admin.settings.*') ? 'active' : '' }}">
             <a href="{{ route('admin.settings.index') }}">

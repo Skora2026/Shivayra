@@ -19,10 +19,10 @@ class UpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $roleId = $this->route('role');
-
         return [
-            'site_name' => 'nullable|string|max:255',
+            // The site name feeds the storefront header, emails and footer — an
+            // empty save must not silently wipe the store's identity.
+            'site_name' => 'required|string|max:255',
             'logo' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
             'favicon' => 'nullable|image|mimes:jpeg,jpg,png,webp|max:2048',
             'email' => 'nullable|email',

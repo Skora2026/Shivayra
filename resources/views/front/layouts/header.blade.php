@@ -1,12 +1,18 @@
 <!-- Top Bar -->
 <section class="nav-top-section">
     <div class="nav-top">
-        <div class="marquee">
-            <span><svg class="icon"><use href="#i-bag"/></svg> Mega Shopping Sale</span>
-            <span><svg class="icon"><use href="#i-fire"/></svg> Flat 50% OFF</span>
-            <span><svg class="icon"><use href="#i-truck"/></svg> Free Shipping Above ₹999</span>
-            <span><svg class="icon"><use href="#i-sparkle"/></svg> New Arrivals</span>
-            <span><svg class="icon"><use href="#i-star"/></svg> Extra 10% on Prepaid</span>
+        {{-- Two identical groups: the track translates -50% (one group width), so
+             group 2 is always in position when group 1 exits — the loop is seamless. --}}
+        <div class="marquee" aria-hidden="false">
+            @foreach ([0, 1] as $group)
+                <div class="marquee-group" @if($group === 1) aria-hidden="true" @endif>
+                    <span><svg class="icon"><use href="#i-bag"/></svg> Mega Shopping Sale</span>
+                    <span><svg class="icon"><use href="#i-fire"/></svg> Flat 50% OFF</span>
+                    <span><svg class="icon"><use href="#i-truck"/></svg> Free Shipping Above ₹999</span>
+                    <span><svg class="icon"><use href="#i-sparkle"/></svg> New Arrivals</span>
+                    <span><svg class="icon"><use href="#i-star"/></svg> Extra 10% on Prepaid</span>
+                </div>
+            @endforeach
         </div>
     </div>
     <div id="toast"><svg class="icon"><use href="#i-check"/></svg> Added to cart</div>
@@ -47,7 +53,7 @@
                         <div class="row g-4">
                             @foreach($headerCategories as $cat)
                                 <div class="col-md-3 mega-category-col">
-                                    <div class="mega-category-title">{{ $cat->name }}</div>
+                                    <a class="mega-category-title" href="{{ route('products') }}?category={{ $cat->slug }}">{{ $cat->name }}</a>
                                     <div class="subcat-group">
                                         @foreach($cat->subCategories as $sub)
                                             <a class="dropdown-item" href="{{ route('products') }}?subcategory={{ $sub->slug }}">
@@ -135,12 +141,11 @@
                 <i class="bi bi-chevron-down"></i>
             </div>
             <ul class="mobile-submenu" id="categorySubmenu">
-                @foreach($headerCategories as $cat)
-                    <li class="mobile-parent">
-                        <div class="mobile-parent-head">
-                            <span>{{ $cat->name }}</span>
-                            <i class="bi bi-plus"></i>
-                        </div>
+                @foreach($headerCategories as $cat)                        <li class="mobile-parent">
+                            <div class="mobile-parent-head">
+                                <span><a href="{{ route('products') }}?category={{ $cat->slug }}">{{ $cat->name }}</a></span>
+                                <i class="bi bi-plus"></i>
+                            </div>
                         <ul class="mobile-child">
                             @foreach($cat->subCategories as $sub)
                                 <li><a href="{{ route('products') }}?subcategory={{ $sub->slug }}">{{ $sub->name }}</a></li>

@@ -63,8 +63,20 @@
 </div>
 
 <script>
-    // Clear localStorage cart upon successful order placement
+    // Clear the local cart upon successful order placement; for logged-in
+    // customers the server-side cart is cleared too (best effort — the
+    // order is already recorded either way).
     localStorage.removeItem("cart");
+    if (document.body.dataset.auth === "1") {
+        fetch("/cart/clear", {
+            method: "POST",
+            headers: {
+                "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]')?.content || "",
+                "Accept": "application/json",
+            },
+            keepalive: true,
+        }).catch(() => {});
+    }
     
     // Dispatch an event to update header cart counters instantly
     document.addEventListener("DOMContentLoaded", function() {
