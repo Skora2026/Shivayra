@@ -31,3 +31,7 @@ Homestead.yaml
 Thumbs.db
 
 .vercel
+
+# Environment files: never commit any variant (live server secrets live in .env.production.bak)
+.env.*
+!.env.example
